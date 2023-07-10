@@ -10,3 +10,5 @@ rke2*
 examples/*/installer.sh
 examples/*/sha256sum.txt
 *flake.lock*
+flake.lock
+*.lock

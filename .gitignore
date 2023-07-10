@@ -1,0 +1,11 @@
+.terraform*
+*.terraform.*
+*.terraform
+terraform*
+override.*
+*_override.tf
+!terraform.md
+rke2*
+*.gz
+examples/*/installer.sh
+examples/*/sha256sum.txt

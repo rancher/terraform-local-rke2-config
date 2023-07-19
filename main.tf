@@ -1,5 +1,7 @@
 locals {
   # convert variables to their Terraform types
+  # there are no maps in the config, just sets of strings like this: "key=value,foo=bar"
+
   debug                                = (var.debug != "" ? tobool(var.debug) : null)
   bind-address                         = (var.bind-address != "" ? toset(split(",", var.bind-address)) : null)
   advertise-address                    = (var.advertise-address != "" ? toset(split(",", var.advertise-address)) : null)
@@ -21,10 +23,10 @@ locals {
   server                               = (var.server != "" ? var.server : null)
   cluster-reset                        = (var.cluster-reset != "" ? tobool(var.cluster-reset) : null)
   cluster-reset-restore-path           = (var.cluster-reset-restore-path != "" ? var.cluster-reset-restore-path : null)
-  kube-apiserver-arg                   = (var.kube-apiserver-arg != "" ? { for a in split(",", var.kube-apiserver-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
-  etcd-arg                             = (var.etcd-arg != "" ? { for a in split(",", var.etcd-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
-  kube-controller-manager-arg          = (var.kube-controller-manager-arg != "" ? { for a in split(",", var.kube-controller-manager-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
-  kube-scheduler-arg                   = (var.kube-scheduler-arg != "" ? { for a in split(",", var.kube-scheduler-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
+  kube-apiserver-arg                   = (var.kube-apiserver-arg != "" ? toset(split(",", var.kube-apiserver-arg)) : null)
+  etcd-arg                             = (var.etcd-arg != "" ? toset(split(",", var.etcd-arg)) : null)
+  kube-controller-manager-arg          = (var.kube-controller-manager-arg != "" ? toset(split(",", var.kube-controller-manager-arg)) : null)
+  kube-scheduler-arg                   = (var.kube-scheduler-arg != "" ? toset(split(",", var.kube-scheduler-arg)) : null)
   etcd-expose-metrics                  = (var.etcd-expose-metrics != "" ? tobool(var.etcd-expose-metrics) : null)
   etcd-disable-snapshots               = (var.etcd-disable-snapshots != "" ? tobool(var.etcd-disable-snapshots) : null)
   etcd-snapshot-name                   = (var.etcd-snapshot-name != "" ? var.etcd-snapshot-name : null)
@@ -49,8 +51,25 @@ locals {
   disable-kube-proxy                   = (var.disable-kube-proxy != "" ? tobool(var.disable-kube-proxy) : null)
   node-name                            = (var.node-name != "" ? var.node-name : null)
   with-node-id                         = (var.with-node-id != "" ? tobool(var.with-node-id) : null)
-  node-label                           = (var.node-label != "" ? { for l in split(",", var.node-label) : element(split("=", l), 0) => element(split("=", l), 1) } : null)
-  node-taint                           = (var.node-taint != "" ? { for t in split(",", var.node-taint) : element(split("=", t), 0) => element(split("=", t), 1) } : null)
+  node-label                           = (var.node-label != "" ? toset(split(",", var.node-label)) : null)
+  node-taint                           = (var.node-taint != "" ? toset(split(",", var.node-taint)) : null)
+  kubelet-arg                          = (var.kubelet-arg != "" ? toset(split(",", var.kubelet-arg)) : null)
+  kube-proxy-arg                       = (var.kube-proxy-arg != "" ? toset(split(",", var.kube-proxy-arg)) : null)
+  control-plane-resource-requests      = (var.control-plane-resource-requests != "" ? toset(split(",", var.control-plane-resource-requests)) : null)
+  control-plane-resource-limits        = (var.control-plane-resource-limits != "" ? toset(split(",", var.control-plane-resource-limits)) : null)
+  control-plane-probe-configuration    = (var.control-plane-probe-configuration != "" ? toset(split(",", var.control-plane-probe-configuration)) : null)
+  kube-apiserver-extra-mount           = (var.kube-apiserver-extra-mount != "" ? toset(split(",", var.kube-apiserver-extra-mount)) : null)
+  kube-scheduler-extra-mount           = (var.kube-scheduler-extra-mount != "" ? toset(split(",", var.kube-scheduler-extra-mount)) : null)
+  kube-controller-manager-extra-mount  = (var.kube-controller-manager-extra-mount != "" ? toset(split(",", var.kube-controller-manager-extra-mount)) : null)
+  kube-proxy-extra-mount               = (var.kube-proxy-extra-mount != "" ? toset(split(",", var.kube-proxy-extra-mount)) : null)
+  etcd-extra-mount                     = (var.etcd-extra-mount != "" ? toset(split(",", var.etcd-extra-mount)) : null)
+  cloud-controller-manager-extra-mount = (var.cloud-controller-manager-extra-mount != "" ? toset(split(",", var.cloud-controller-manager-extra-mount)) : null)
+  kube-apiserver-extra-env             = (var.kube-apiserver-extra-env != "" ? toset(split(",", var.kube-apiserver-extra-env)) : null)
+  kube-scheduler-extra-env             = (var.kube-scheduler-extra-env != "" ? toset(split(",", var.kube-scheduler-extra-env)) : null)
+  kube-controller-manager-extra-env    = (var.kube-controller-manager-extra-env != "" ? toset(split(",", var.kube-controller-manager-extra-env)) : null)
+  kube-proxy-extra-env                 = (var.kube-proxy-extra-env != "" ? toset(split(",", var.kube-proxy-extra-env)) : null)
+  etcd-extra-env                       = (var.etcd-extra-env != "" ? toset(split(",", var.etcd-extra-env)) : null)
+  cloud-controller-manager-extra-env   = (var.cloud-controller-manager-extra-env != "" ? toset(split(",", var.cloud-controller-manager-extra-env)) : null)
   image-credential-provider-bin-dir    = (var.image-credential-provider-bin-dir != "" ? var.image-credential-provider-bin-dir : null)
   image-credential-provider-config     = (var.image-credential-provider-config != "" ? var.image-credential-provider-config : null)
   container-runtime-endpoint           = (var.container-runtime-endpoint != "" ? var.container-runtime-endpoint : null)
@@ -60,8 +79,6 @@ locals {
   node-ip                              = (var.node-ip != "" ? var.node-ip : null)
   node-external-ip                     = (var.node-external-ip != "" ? toset(split(",", var.node-external-ip)) : null)
   resolv-conf                          = (var.resolv-conf != "" ? var.resolv-conf : null)
-  kubelet-arg                          = (var.kubelet-arg != "" ? { for a in split(",", var.kubelet-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
-  kube-proxy-arg                       = (var.kube-proxy-arg != "" ? { for a in split(",", var.kube-proxy-arg) : element(split("=", a), 0) => element(split("=", a), 1) } : null)
   protect-kernel-defaults              = (var.protect-kernel-defaults != "" ? tobool(var.protect-kernel-defaults) : null)
   enable-pprof                         = (var.enable-pprof != "" ? tobool(var.enable-pprof) : null)
   selinux                              = (var.selinux != "" ? tobool(var.selinux) : null)
@@ -82,21 +99,7 @@ locals {
   profile                              = (var.profile != "" ? var.profile : null)
   audit-policy-file                    = (var.audit-policy-file != "" ? var.audit-policy-file : null)
   pod-security-admission-config-file   = (var.pod-security-admission-config-file != "" ? var.pod-security-admission-config-file : null)
-  control-plane-resource-requests      = (var.control-plane-resource-requests != "" ? { for r in split(",", var.control-plane-resource-requests) : element(split("=", r), 0) => element(split("=", r), 1) } : null)
-  control-plane-resource-limits        = (var.control-plane-resource-limits != "" ? { for l in split(",", var.control-plane-resource-limits) : element(split("=", l), 0) => element(split("=", l), 1) } : null)
-  control-plane-probe-configuration    = (var.control-plane-probe-configuration != "" ? { for c in split(",", var.control-plane-probe-configuration) : element(split("=", c), 0) => element(split("=", c), 1) } : null)
-  kube-apiserver-extra-mount           = (var.kube-apiserver-extra-mount != "" ? { for m in split(",", var.kube-apiserver-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  kube-scheduler-extra-mount           = (var.kube-scheduler-extra-mount != "" ? { for m in split(",", var.kube-scheduler-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  kube-controller-manager-extra-mount  = (var.kube-controller-manager-extra-mount != "" ? { for m in split(",", var.kube-controller-manager-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  kube-proxy-extra-mount               = (var.kube-proxy-extra-mount != "" ? { for m in split(",", var.kube-proxy-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  etcd-extra-mount                     = (var.etcd-extra-mount != "" ? { for m in split(",", var.etcd-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  cloud-controller-manager-extra-mount = (var.cloud-controller-manager-extra-mount != "" ? { for m in split(",", var.cloud-controller-manager-extra-mount) : element(split("=", m), 0) => element(split("=", m), 1) } : null)
-  kube-apiserver-extra-env             = (var.kube-apiserver-extra-env != "" ? { for e in split(",", var.kube-apiserver-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
-  kube-scheduler-extra-env             = (var.kube-scheduler-extra-env != "" ? { for e in split(",", var.kube-scheduler-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
-  kube-controller-manager-extra-env    = (var.kube-controller-manager-extra-env != "" ? { for e in split(",", var.kube-controller-manager-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
-  kube-proxy-extra-env                 = (var.kube-proxy-extra-env != "" ? { for e in split(",", var.kube-proxy-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
-  etcd-extra-env                       = (var.etcd-extra-env != "" ? { for e in split(",", var.etcd-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
-  cloud-controller-manager-extra-env   = (var.cloud-controller-manager-extra-env != "" ? { for e in split(",", var.cloud-controller-manager-extra-env) : element(split("=", e), 0) => element(split("=", e), 1) } : null)
+
   # put all the variables in a map
   config = {
     debug                                = local.debug
@@ -198,7 +201,8 @@ locals {
     cloud-controller-manager-extra-env   = local.cloud-controller-manager-extra-env
   }
   filtered_config = { for k, v in local.config : k => v if v != null }
-  config_content  = (chomp(yamlencode(local.filtered_config)) != "{}" ? chomp(yamlencode(local.filtered_config)) : "")
+  # remove quotes from config_content
+  config_content = (chomp(yamlencode(local.filtered_config)) != "{}" ? yamlencode(local.filtered_config) : "")
 }
 
 resource "local_file" "config" {

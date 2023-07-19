@@ -827,7 +827,7 @@ variable "node-label" {
     condition = (var.node-label != "" ? alltrue([
       for label in split(",", var.node-label) :
       alltrue([for l in split("=", label) :
-        can(regex("^[a-zA-Z0-9.]{1,63}[/]?(?:[a-zA-Z0-9]{1,63}[-_.])*[a-zA-Z0-9.]{1,63}$", label))
+        can(regex("^[a-zA-Z0-9.]{1,63}[/]?(?:[a-zA-Z0-9]{1,63}[-_.])*[a-zA-Z0-9.]{1,63}$", l))
       ])
       ]) : true
     )

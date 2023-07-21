@@ -6,11 +6,11 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestEasy(t *testing.T) {
+func TestAdvanced(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/easy",
+		TerraformDir: "../examples/advanced",
 	})
 
 	defer terraform.Destroy(t, terraformOptions)

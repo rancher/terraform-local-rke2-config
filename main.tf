@@ -1,211 +1,112 @@
 locals {
-  # convert variables to their Terraform types
-  # there are no maps in the config, just sets of strings like this: "key=value,foo=bar"
-
-  debug                                = (var.debug != "" ? tobool(var.debug) : null)
-  bind-address                         = (var.bind-address != "" ? toset(split(",", var.bind-address)) : null)
-  advertise-address                    = (var.advertise-address != "" ? toset(split(",", var.advertise-address)) : null)
-  tls-san                              = (var.tls-san != "" ? toset(split(",", var.tls-san)) : null)
-  data-dir                             = (var.data-dir != "" ? var.data-dir : null)
-  cluster-cidr                         = (var.cluster-cidr != "" ? toset(split(",", var.cluster-cidr)) : null)
-  service-cidr                         = (var.service-cidr != "" ? toset(split(",", var.service-cidr)) : null)
-  service-node-port-range              = (var.service-node-port-range != "" ? var.service-node-port-range : null)
-  cluster-dns                          = (var.cluster-dns != "" ? toset(split(",", var.cluster-dns)) : null)
-  cluster-domain                       = (var.cluster-domain != "" ? var.cluster-domain : null)
-  egress-selector-mode                 = (var.egress-selector-mode != "" ? var.egress-selector-mode : null)
-  servicelb-namespace                  = (var.servicelb-namespace != "" ? var.servicelb-namespace : null)
-  write-kubeconfig                     = (var.write-kubeconfig != "" ? var.write-kubeconfig : null)
-  write-kubeconfig-mode                = (var.write-kubeconfig-mode != "" ? var.write-kubeconfig-mode : null)
-  token                                = (var.token != "" ? var.token : null)
-  token-file                           = (var.token-file != "" ? var.token-file : null)
-  agent-token                          = (var.agent-token != "" ? var.agent-token : null)
-  agent-token-file                     = (var.agent-token-file != "" ? var.agent-token-file : null)
-  server                               = (var.server != "" ? var.server : null)
-  cluster-reset                        = (var.cluster-reset != "" ? tobool(var.cluster-reset) : null)
-  cluster-reset-restore-path           = (var.cluster-reset-restore-path != "" ? var.cluster-reset-restore-path : null)
-  kube-apiserver-arg                   = (var.kube-apiserver-arg != "" ? toset(split(",", var.kube-apiserver-arg)) : null)
-  etcd-arg                             = (var.etcd-arg != "" ? toset(split(",", var.etcd-arg)) : null)
-  kube-controller-manager-arg          = (var.kube-controller-manager-arg != "" ? toset(split(",", var.kube-controller-manager-arg)) : null)
-  kube-scheduler-arg                   = (var.kube-scheduler-arg != "" ? toset(split(",", var.kube-scheduler-arg)) : null)
-  etcd-expose-metrics                  = (var.etcd-expose-metrics != "" ? tobool(var.etcd-expose-metrics) : null)
-  etcd-disable-snapshots               = (var.etcd-disable-snapshots != "" ? tobool(var.etcd-disable-snapshots) : null)
-  etcd-snapshot-name                   = (var.etcd-snapshot-name != "" ? var.etcd-snapshot-name : null)
-  etcd-snapshot-schedule-cron          = (var.etcd-snapshot-schedule-cron != "" ? var.etcd-snapshot-schedule-cron : null)
-  etcd-snapshot-retention              = (var.etcd-snapshot-retention != "" ? tonumber(var.etcd-snapshot-retention) : null)
-  etcd-snapshot-dir                    = (var.etcd-snapshot-dir != "" ? var.etcd-snapshot-dir : null)
-  etcd-snapshot-compress               = (var.etcd-snapshot-compress != "" ? tobool(var.etcd-snapshot-compress) : null)
-  etcd-s3                              = (var.etcd-s3 != "" ? tobool(var.etcd-s3) : null)
-  etcd-s3-endpoint                     = (var.etcd-s3-endpoint != "" ? var.etcd-s3-endpoint : null)
-  etcd-s3-endpoint-ca                  = (var.etcd-s3-endpoint-ca != "" ? var.etcd-s3-endpoint-ca : null)
-  etcd-s3-skip-ssl-verify              = (var.etcd-s3-skip-ssl-verify != "" ? tobool(var.etcd-s3-skip-ssl-verify) : null)
-  etcd-s3-access-key                   = (var.etcd-s3-access-key != "" ? var.etcd-s3-access-key : null)
-  etcd-s3-secret-key                   = (var.etcd-s3-secret-key != "" ? var.etcd-s3-secret-key : null)
-  etcd-s3-bucket                       = (var.etcd-s3-bucket != "" ? var.etcd-s3-bucket : null)
-  etcd-s3-region                       = (var.etcd-s3-region != "" ? var.etcd-s3-region : null)
-  etcd-s3-folder                       = (var.etcd-s3-folder != "" ? var.etcd-s3-folder : null)
-  etcd-s3-insecure                     = (var.etcd-s3-insecure != "" ? tobool(var.etcd-s3-insecure) : null)
-  etcd-s3-timeout                      = (var.etcd-s3-timeout != "" ? var.etcd-s3-timeout : null)
-  disable                              = (var.disable != "" ? toset(split(",", var.disable)) : null)
-  disable-scheduler                    = (var.disable-scheduler != "" ? tobool(var.disable-scheduler) : null)
-  disable-cloud-controller             = (var.disable-cloud-controller != "" ? tobool(var.disable-cloud-controller) : null)
-  disable-kube-proxy                   = (var.disable-kube-proxy != "" ? tobool(var.disable-kube-proxy) : null)
-  node-name                            = (var.node-name != "" ? var.node-name : null)
-  with-node-id                         = (var.with-node-id != "" ? tobool(var.with-node-id) : null)
-  node-label                           = (var.node-label != "" ? toset(split(",", var.node-label)) : null)
-  node-taint                           = (var.node-taint != "" ? toset(split(",", var.node-taint)) : null)
-  kubelet-arg                          = (var.kubelet-arg != "" ? toset(split(",", var.kubelet-arg)) : null)
-  kube-proxy-arg                       = (var.kube-proxy-arg != "" ? toset(split(",", var.kube-proxy-arg)) : null)
-  control-plane-resource-requests      = (var.control-plane-resource-requests != "" ? toset(split(",", var.control-plane-resource-requests)) : null)
-  control-plane-resource-limits        = (var.control-plane-resource-limits != "" ? toset(split(",", var.control-plane-resource-limits)) : null)
-  control-plane-probe-configuration    = (var.control-plane-probe-configuration != "" ? toset(split(",", var.control-plane-probe-configuration)) : null)
-  kube-apiserver-extra-mount           = (var.kube-apiserver-extra-mount != "" ? toset(split(",", var.kube-apiserver-extra-mount)) : null)
-  kube-scheduler-extra-mount           = (var.kube-scheduler-extra-mount != "" ? toset(split(",", var.kube-scheduler-extra-mount)) : null)
-  kube-controller-manager-extra-mount  = (var.kube-controller-manager-extra-mount != "" ? toset(split(",", var.kube-controller-manager-extra-mount)) : null)
-  kube-proxy-extra-mount               = (var.kube-proxy-extra-mount != "" ? toset(split(",", var.kube-proxy-extra-mount)) : null)
-  etcd-extra-mount                     = (var.etcd-extra-mount != "" ? toset(split(",", var.etcd-extra-mount)) : null)
-  cloud-controller-manager-extra-mount = (var.cloud-controller-manager-extra-mount != "" ? toset(split(",", var.cloud-controller-manager-extra-mount)) : null)
-  kube-apiserver-extra-env             = (var.kube-apiserver-extra-env != "" ? toset(split(",", var.kube-apiserver-extra-env)) : null)
-  kube-scheduler-extra-env             = (var.kube-scheduler-extra-env != "" ? toset(split(",", var.kube-scheduler-extra-env)) : null)
-  kube-controller-manager-extra-env    = (var.kube-controller-manager-extra-env != "" ? toset(split(",", var.kube-controller-manager-extra-env)) : null)
-  kube-proxy-extra-env                 = (var.kube-proxy-extra-env != "" ? toset(split(",", var.kube-proxy-extra-env)) : null)
-  etcd-extra-env                       = (var.etcd-extra-env != "" ? toset(split(",", var.etcd-extra-env)) : null)
-  cloud-controller-manager-extra-env   = (var.cloud-controller-manager-extra-env != "" ? toset(split(",", var.cloud-controller-manager-extra-env)) : null)
-  image-credential-provider-bin-dir    = (var.image-credential-provider-bin-dir != "" ? var.image-credential-provider-bin-dir : null)
-  image-credential-provider-config     = (var.image-credential-provider-config != "" ? var.image-credential-provider-config : null)
-  container-runtime-endpoint           = (var.container-runtime-endpoint != "" ? var.container-runtime-endpoint : null)
-  snapshotter                          = (var.snapshotter != "" ? var.snapshotter : null)
-  private-registry                     = (var.private-registry != "" ? var.private-registry : null)
-  system-default-registry              = (var.system-default-registry != "" ? var.system-default-registry : null)
-  node-ip                              = (var.node-ip != "" ? var.node-ip : null)
-  node-external-ip                     = (var.node-external-ip != "" ? toset(split(",", var.node-external-ip)) : null)
-  resolv-conf                          = (var.resolv-conf != "" ? var.resolv-conf : null)
-  protect-kernel-defaults              = (var.protect-kernel-defaults != "" ? tobool(var.protect-kernel-defaults) : null)
-  enable-pprof                         = (var.enable-pprof != "" ? tobool(var.enable-pprof) : null)
-  selinux                              = (var.selinux != "" ? tobool(var.selinux) : null)
-  lb-server-port                       = (var.lb-server-port != "" ? tonumber(var.lb-server-port) : null)
-  cni                                  = (var.cni != "" ? toset(split(",", var.cni)) : null)
-  enable-servicelb                     = (var.enable-servicelb != "" ? tobool(var.enable-servicelb) : null)
-  kube-apiserver-image                 = (var.kube-apiserver-image != "" ? var.kube-apiserver-image : null)
-  kube-controller-manager-image        = (var.kube-controller-manager-image != "" ? var.kube-controller-manager-image : null)
-  cloud-controller-manager-image       = (var.cloud-controller-manager-image != "" ? var.cloud-controller-manager-image : null)
-  kube-proxy-image                     = (var.kube-proxy-image != "" ? var.kube-proxy-image : null)
-  kube-scheduler-image                 = (var.kube-scheduler-image != "" ? var.kube-scheduler-image : null)
-  pause-image                          = (var.pause-image != "" ? var.pause-image : null)
-  runtime-image                        = (var.runtime-image != "" ? var.runtime-image : null)
-  etcd-image                           = (var.etcd-image != "" ? var.etcd-image : null)
-  kubelet-path                         = (var.kubelet-path != "" ? var.kubelet-path : null)
-  cloud-provider-name                  = (var.cloud-provider-name != "" ? var.cloud-provider-name : null)
-  cloud-provider-config                = (var.cloud-provider-config != "" ? var.cloud-provider-config : null)
-  profile                              = (var.profile != "" ? var.profile : null)
-  audit-policy-file                    = (var.audit-policy-file != "" ? var.audit-policy-file : null)
-  pod-security-admission-config-file   = (var.pod-security-admission-config-file != "" ? var.pod-security-admission-config-file : null)
-
-  # put all the variables in a map
   config = {
-    debug                                = local.debug
-    bind-address                         = local.bind-address
-    advertise-address                    = local.advertise-address
-    tls-san                              = local.tls-san
-    data-dir                             = local.data-dir
-    cluster-cidr                         = local.cluster-cidr
-    service-cidr                         = local.service-cidr
-    service-node-port-range              = local.service-node-port-range
-    cluster-dns                          = local.cluster-dns
-    cluster-domain                       = local.cluster-domain
-    egress-selector-mode                 = local.egress-selector-mode
-    servicelb-namespace                  = local.servicelb-namespace
-    write-kubeconfig                     = local.write-kubeconfig
-    write-kubeconfig-mode                = local.write-kubeconfig-mode
-    token                                = local.token
-    token-file                           = local.token-file
-    agent-token                          = local.agent-token
-    agent-token-file                     = local.agent-token-file
-    server                               = local.server
-    cluster-reset                        = local.cluster-reset
-    cluster-reset-restore-path           = local.cluster-reset-restore-path
-    kube-apiserver-arg                   = local.kube-apiserver-arg
-    etcd-arg                             = local.etcd-arg
-    kube-controller-manager-arg          = local.kube-controller-manager-arg
-    kube-scheduler-arg                   = local.kube-scheduler-arg
-    etcd-expose-metrics                  = local.etcd-expose-metrics
-    etcd-disable-snapshots               = local.etcd-disable-snapshots
-    etcd-snapshot-name                   = local.etcd-snapshot-name
-    etcd-snapshot-schedule-cron          = local.etcd-snapshot-schedule-cron
-    etcd-snapshot-retention              = local.etcd-snapshot-retention
-    etcd-snapshot-dir                    = local.etcd-snapshot-dir
-    etcd-snapshot-compress               = local.etcd-snapshot-compress
-    etcd-s3                              = local.etcd-s3
-    etcd-s3-endpoint                     = local.etcd-s3-endpoint
-    etcd-s3-endpoint-ca                  = local.etcd-s3-endpoint-ca
-    etcd-s3-skip-ssl-verify              = local.etcd-s3-skip-ssl-verify
-    etcd-s3-access-key                   = local.etcd-s3-access-key
-    etcd-s3-secret-key                   = local.etcd-s3-secret-key
-    etcd-s3-bucket                       = local.etcd-s3-bucket
-    etcd-s3-region                       = local.etcd-s3-region
-    etcd-s3-folder                       = local.etcd-s3-folder
-    etcd-s3-insecure                     = local.etcd-s3-insecure
-    etcd-s3-timeout                      = local.etcd-s3-timeout
-    disable                              = local.disable
-    disable-scheduler                    = local.disable-scheduler
-    disable-cloud-controller             = local.disable-cloud-controller
-    disable-kube-proxy                   = local.disable-kube-proxy
-    node-name                            = local.node-name
-    with-node-id                         = local.with-node-id
-    node-label                           = local.node-label
-    node-taint                           = local.node-taint
-    image-credential-provider-bin-dir    = local.image-credential-provider-bin-dir
-    image-credential-provider-config     = local.image-credential-provider-config
-    container-runtime-endpoint           = local.container-runtime-endpoint
-    snapshotter                          = local.snapshotter
-    private-registry                     = local.private-registry
-    system-default-registry              = local.system-default-registry
-    node-ip                              = local.node-ip
-    node-external-ip                     = local.node-external-ip
-    resolv-conf                          = local.resolv-conf
-    kubelet-arg                          = local.kubelet-arg
-    kube-proxy-arg                       = local.kube-proxy-arg
-    protect-kernel-defaults              = local.protect-kernel-defaults
-    enable-pprof                         = local.enable-pprof
-    selinux                              = local.selinux
-    lb-server-port                       = local.lb-server-port
-    cni                                  = local.cni
-    enable-servicelb                     = local.enable-servicelb
-    kube-apiserver-image                 = local.kube-apiserver-image
-    kube-controller-manager-image        = local.kube-controller-manager-image
-    cloud-controller-manager-image       = local.cloud-controller-manager-image
-    kube-proxy-image                     = local.kube-proxy-image
-    kube-scheduler-image                 = local.kube-scheduler-image
-    pause-image                          = local.pause-image
-    runtime-image                        = local.runtime-image
-    etcd-image                           = local.etcd-image
-    kubelet-path                         = local.kubelet-path
-    cloud-provider-name                  = local.cloud-provider-name
-    cloud-provider-config                = local.cloud-provider-config
-    profile                              = local.profile
-    audit-policy-file                    = local.audit-policy-file
-    pod-security-admission-config-file   = local.pod-security-admission-config-file
-    control-plane-resource-requests      = local.control-plane-resource-requests
-    control-plane-resource-limits        = local.control-plane-resource-limits
-    control-plane-probe-configuration    = local.control-plane-probe-configuration
-    kube-apiserver-extra-mount           = local.kube-apiserver-extra-mount
-    kube-scheduler-extra-mount           = local.kube-scheduler-extra-mount
-    kube-controller-manager-extra-mount  = local.kube-controller-manager-extra-mount
-    kube-proxy-extra-mount               = local.kube-proxy-extra-mount
-    etcd-extra-mount                     = local.etcd-extra-mount
-    cloud-controller-manager-extra-mount = local.cloud-controller-manager-extra-mount
-    kube-apiserver-extra-env             = local.kube-apiserver-extra-env
-    kube-scheduler-extra-env             = local.kube-scheduler-extra-env
-    kube-controller-manager-extra-env    = local.kube-controller-manager-extra-env
-    kube-proxy-extra-env                 = local.kube-proxy-extra-env
-    etcd-extra-env                       = local.etcd-extra-env
-    cloud-controller-manager-extra-env   = local.cloud-controller-manager-extra-env
+    debug                                = var.debug
+    bind-address                         = var.bind-address
+    advertise-address                    = var.advertise-address
+    tls-san                              = var.tls-san
+    data-dir                             = var.data-dir
+    cluster-cidr                         = var.cluster-cidr
+    service-cidr                         = var.service-cidr
+    service-node-port-range              = var.service-node-port-range
+    cluster-dns                          = var.cluster-dns
+    cluster-domain                       = var.cluster-domain
+    egress-selector-mode                 = var.egress-selector-mode
+    servicelb-namespace                  = var.servicelb-namespace
+    write-kubeconfig                     = var.write-kubeconfig
+    write-kubeconfig-mode                = var.write-kubeconfig-mode
+    token                                = var.token
+    token-file                           = var.token-file
+    agent-token                          = var.agent-token
+    agent-token-file                     = var.agent-token-file
+    server                               = var.server
+    cluster-reset                        = var.cluster-reset
+    cluster-reset-restore-path           = var.cluster-reset-restore-path
+    kube-apiserver-arg                   = var.kube-apiserver-arg
+    etcd-arg                             = var.etcd-arg
+    kube-controller-manager-arg          = var.kube-controller-manager-arg
+    kube-scheduler-arg                   = var.kube-scheduler-arg
+    etcd-expose-metrics                  = var.etcd-expose-metrics
+    etcd-disable-snapshots               = var.etcd-disable-snapshots
+    etcd-snapshot-name                   = var.etcd-snapshot-name
+    etcd-snapshot-schedule-cron          = var.etcd-snapshot-schedule-cron
+    etcd-snapshot-retention              = var.etcd-snapshot-retention
+    etcd-snapshot-dir                    = var.etcd-snapshot-dir
+    etcd-snapshot-compress               = var.etcd-snapshot-compress
+    etcd-s3                              = var.etcd-s3
+    etcd-s3-endpoint                     = var.etcd-s3-endpoint
+    etcd-s3-endpoint-ca                  = var.etcd-s3-endpoint-ca
+    etcd-s3-skip-ssl-verify              = var.etcd-s3-skip-ssl-verify
+    etcd-s3-access-key                   = var.etcd-s3-access-key
+    etcd-s3-secret-key                   = var.etcd-s3-secret-key
+    etcd-s3-bucket                       = var.etcd-s3-bucket
+    etcd-s3-region                       = var.etcd-s3-region
+    etcd-s3-folder                       = var.etcd-s3-folder
+    etcd-s3-insecure                     = var.etcd-s3-insecure
+    etcd-s3-timeout                      = var.etcd-s3-timeout
+    disable                              = var.disable
+    disable-scheduler                    = var.disable-scheduler
+    disable-cloud-controller             = var.disable-cloud-controller
+    disable-kube-proxy                   = var.disable-kube-proxy
+    node-name                            = var.node-name
+    with-node-id                         = var.with-node-id
+    node-label                           = var.node-label
+    node-taint                           = var.node-taint
+    image-credential-provider-bin-dir    = var.image-credential-provider-bin-dir
+    image-credential-provider-config     = var.image-credential-provider-config
+    container-runtime-endpoint           = var.container-runtime-endpoint
+    snapshotter                          = var.snapshotter
+    private-registry                     = var.private-registry
+    system-default-registry              = var.system-default-registry
+    node-ip                              = var.node-ip
+    node-external-ip                     = var.node-external-ip
+    resolv-conf                          = var.resolv-conf
+    kubelet-arg                          = var.kubelet-arg
+    kube-proxy-arg                       = var.kube-proxy-arg
+    protect-kernel-defaults              = var.protect-kernel-defaults
+    enable-pprof                         = var.enable-pprof
+    selinux                              = var.selinux
+    lb-server-port                       = var.lb-server-port
+    cni                                  = var.cni
+    enable-servicelb                     = var.enable-servicelb
+    kube-apiserver-image                 = var.kube-apiserver-image
+    kube-controller-manager-image        = var.kube-controller-manager-image
+    cloud-controller-manager-image       = var.cloud-controller-manager-image
+    kube-proxy-image                     = var.kube-proxy-image
+    kube-scheduler-image                 = var.kube-scheduler-image
+    pause-image                          = var.pause-image
+    runtime-image                        = var.runtime-image
+    etcd-image                           = var.etcd-image
+    kubelet-path                         = var.kubelet-path
+    cloud-provider-name                  = var.cloud-provider-name
+    cloud-provider-config                = var.cloud-provider-config
+    profile                              = var.profile
+    audit-policy-file                    = var.audit-policy-file
+    pod-security-admission-config-file   = var.pod-security-admission-config-file
+    control-plane-resource-requests      = var.control-plane-resource-requests
+    control-plane-resource-limits        = var.control-plane-resource-limits
+    control-plane-probe-configuration    = var.control-plane-probe-configuration
+    kube-apiserver-extra-mount           = var.kube-apiserver-extra-mount
+    kube-scheduler-extra-mount           = var.kube-scheduler-extra-mount
+    kube-controller-manager-extra-mount  = var.kube-controller-manager-extra-mount
+    kube-proxy-extra-mount               = var.kube-proxy-extra-mount
+    etcd-extra-mount                     = var.etcd-extra-mount
+    cloud-controller-manager-extra-mount = var.cloud-controller-manager-extra-mount
+    kube-apiserver-extra-env             = var.kube-apiserver-extra-env
+    kube-scheduler-extra-env             = var.kube-scheduler-extra-env
+    kube-controller-manager-extra-env    = var.kube-controller-manager-extra-env
+    kube-proxy-extra-env                 = var.kube-proxy-extra-env
+    etcd-extra-env                       = var.etcd-extra-env
+    cloud-controller-manager-extra-env   = var.cloud-controller-manager-extra-env
   }
   filtered_config = { for k, v in local.config : k => v if v != null }
-  # remove quotes from config_content
-  config_content = (chomp(yamlencode(local.filtered_config)) != "{}" ? yamlencode(local.filtered_config) : "")
+  encoded_config  = jsonencode(local.filtered_config)
+
+  config_content = (chomp(local.encoded_config) != "{}" ? local.encoded_config : "")
 }
 
 resource "local_file" "config" {
-  content  = local.config_content
-  filename = "rke2-config.yaml"
+  content              = local.config_content
+  filename             = "rke2-config.json"
+  file_permission      = "0644"
+  directory_permission = "0755"
 }

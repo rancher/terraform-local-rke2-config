@@ -1,0 +1,4 @@
+
+module "TestBasic" {
+  source = "../../"
+}

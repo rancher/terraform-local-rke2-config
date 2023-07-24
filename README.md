@@ -1,6 +1,8 @@
 # Terraform Local RKE2 Config
 
-WARNING! Alpha release, this module is not ready yet.
+
+WARNING! This is a work in progress and not ready to be used.
+
 
 This module uses the `hashicorp/local` provider to build a `config.yaml` which can control RKE2.
 
@@ -18,9 +20,16 @@ After loading the Nix shell, Nix will source the .envrc, setting all of the envi
 This is a way to resolve "works on my machine" issues, if you would prefer to install the local requirements on your machine, this module will work without modification.
 Simply install the same requirements in the flake.nix and everything will work.
 
-## Other Requirements
+### Other Requirements
+
+#### Filesystem Write Access
 
 This module writes to the local filesystem, you will need permissions to do so.
+
+#### RKE2 Binary
+
+When developing, we build `variables.tf` based on the help command on the RKE2 binary.
+This is a big topic, please see [variables.md](./variables.md) for more information.
 
 ## Local State
 

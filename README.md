@@ -1,5 +1,7 @@
 # Terraform Local RKE2 Config
 
+WARNING! Alpha release, this module is not ready yet.
+
 This module uses the `hashicorp/local` provider to build a `config.yaml` which can control RKE2.
 
 This is an "Independent" module, please see [terraform.md](./terraform.md) for more information.

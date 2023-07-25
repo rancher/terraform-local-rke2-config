@@ -24,3 +24,13 @@ jobs:
       
     - name: Terraform Plan
       run: cd examples/basic && terraform init && terraform plan
+  
+  terratest:
+    name: 'Terratest'
+    runs-on: hashicorp/terraform:full
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Run Terratest
+      run: cd tests && go test -v -timeout 30m -parallel 30

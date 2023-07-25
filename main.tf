@@ -99,14 +99,17 @@ locals {
     cloud-controller-manager-extra-env   = var.cloud-controller-manager-extra-env
   }
   filtered_config = { for k, v in local.config : k => v if v != null }
-  encoded_config  = jsonencode(local.filtered_config)
 
-  config_content = (chomp(local.encoded_config) != "{}" ? local.encoded_config : "")
+  json_encoded_config = jsonencode(local.filtered_config)
+  json_config_content = (chomp(local.json_encoded_config) != "{}" ? local.json_encoded_config : "")
+
+  yaml_encoded_config = yamlencode(local.filtered_config)
+  yaml_config_content = (chomp(local.yaml_encoded_config) != "{}" ? local.yaml_encoded_config : "")
 }
 
-resource "local_file" "config" {
-  content              = local.config_content
-  filename             = "rke2-config.json"
-  file_permission      = "0644"
-  directory_permission = "0755"
-}
+# resource "local_file" "config" {
+#   content              = local.config_content
+#   filename             = "rke2-config.json"
+#   file_permission      = "0644"
+#   directory_permission = "0755"
+# }

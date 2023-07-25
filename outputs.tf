@@ -1,6 +1,6 @@
 output "json_config" {
-  value = local.config_content
+  value = local.json_config_content
 }
 output "yaml_config" {
-  value = local.config_content
+  value = local.yaml_config_content
 }

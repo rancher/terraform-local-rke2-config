@@ -18,9 +18,6 @@
   # select HEAD on a branch
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-  # follows allows idempotent loading of nixpkgs in dependent flakes
-  #inputs.nixpkgs.follows = "nixpkgs/0228346f7b58f1a284fdb1b72df6298b06677495";
-
   # install flake utils
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
@@ -32,25 +29,11 @@
       let pkgs = nixpkgs.legacyPackages.${system};
       in
       {
-        # ignore deprecated warning for devShell until we figure out how to fix
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
             bashInteractive
-            curl
-            file
             git
-            unixtools.watch
-            jq
-            kubectl
-            kubernetes-helm
-            nettools
-            openssl
-            shellcheck
-            shfmt
-            sops
             terraform
-            wget
-            yq
           ];
           shellHook = ''
             source .envrc

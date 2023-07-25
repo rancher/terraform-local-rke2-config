@@ -106,10 +106,3 @@ locals {
   yaml_encoded_config = yamlencode(local.filtered_config)
   yaml_config_content = (chomp(local.yaml_encoded_config) != "{}" ? local.yaml_encoded_config : "")
 }
-
-# resource "local_file" "config" {
-#   content              = local.config_content
-#   filename             = "rke2-config.json"
-#   file_permission      = "0644"
-#   directory_permission = "0755"
-# }

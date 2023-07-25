@@ -27,7 +27,7 @@ jobs:
   
   terratest:
     name: 'Terratest'
-    runs-on: hashicorp/terraform:full
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2

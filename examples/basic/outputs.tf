@@ -1,3 +1,3 @@
 output "config" {
-  value = module.TestBasic.config
+  value = module.TestBasic.yaml_config
 }

@@ -34,6 +34,7 @@
             bashInteractive
             git
             terraform
+            tflint
           ];
           shellHook = ''
             source .envrc

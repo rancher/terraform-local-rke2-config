@@ -356,7 +356,7 @@ variable "server" {
   validation {
     condition = (
       var.server != null ? anytrue([
-        can(regex("^https?://(?:[[:alnum:]\\p{Pd}]{1,63}\\.)+[[:alnum:]\\p{Pd}]{1,63}(?::[[:digit:]]{1,5})?$", var.server)), # FQDN with optional port
+        can(regex("^https?://(?:[[:alnum:]\\p{Pd}]{1,63}\\.)*[[:alnum:]\\p{Pd}]{1,63}(?::[[:digit:]]{1,5})?$", var.server)), # FQDN with optional port
         can(regex("^https?://(?:[[:digit:]]{1,3}\\.){3}[[:digit:]]{1,3}(?::[[:digit:]]{1,5})?$", var.server)),               # IPv4 with optional port
         can(regex("^https?://(?:[[:xdigit:]]{0,4}:{1,7}){1,7}[[:xdigit:]]{0,4}$", var.server)),                              # IPv6
     ]) : true)

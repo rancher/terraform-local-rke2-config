@@ -10,14 +10,11 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+    - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.5.7
-        with_wrapper: false
+        terraform_version: ">=1.4 <1.6"
+        terraform_wrapper: false
 
     - name: Init Basic
       run: cd examples/basic && terraform init -upgrade
@@ -29,11 +26,8 @@ jobs:
     name: 'TFLint'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
+    - uses: actions/checkout@v2
     - uses: terraform-linters/setup-tflint@v3
-      name: Setup TFLint
       with:
         tflint_version: latest
 
@@ -50,14 +44,11 @@ jobs:
     name: 'Terratest'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
+    - uses: actions/checkout@v2
+    - uses: hashicorp/setup-terraform@v2
       with:
-        terraform_version: 1.5.7
-        with_wrapper: false
+        terraform_version: ">=1.4 <1.6"
+        terraform_wrapper: false
 
     - name: Run Terratest
       run: cd ./tests && go test -v

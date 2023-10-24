@@ -12,3 +12,6 @@ output "yaml_config" {
     The generated config formatted as yaml.
   EOT
 }
+output "local_file_path" {
+  value = "${local.file_path}/${local.file_name}"
+}

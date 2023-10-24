@@ -1711,3 +1711,20 @@ variable "cloud-controller-manager-extra-env" {
   # the args themselves are too complex to be validated here
   # https://kubernetes.io/docs/concepts/workloads/pods/downward-api/
 }
+
+## These variables are for the module, not the rke2 config
+variable "local_file_path" {
+  type        = string
+  description = <<-EOT
+    A local file path to store the config output.
+    Will use the root module directory by default.
+  EOT
+  default     = ""
+}
+variable "local_file_name" {
+  type        = string
+  description = <<-EOT
+    A local file name to store the config output.
+  EOT
+  default     = "50-initial-generated-config.yaml"
+}

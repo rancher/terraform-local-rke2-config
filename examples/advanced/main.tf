@@ -21,8 +21,8 @@ module "TestAdvanced" {
 
   kubelet-arg = [
     "alsologtostderr=true",
-    "feature-gates=MemoryManager=true",
-    "kube-reserved=cpu=400m,memory=1Gi",
+    "feature-gates=${join(",", ["MemoryManager=true"])}",
+    "kube-reserved=${join(",", ["cpu=400m", "memory=1Gi"])}",
     "system-reserved=cpu=400m,memory=1Gi",
     "memory-manager-policy=Static",
     "reserved-memory=0:memory=2Gi",
@@ -47,4 +47,8 @@ module "TestAdvanced" {
   etcd-s3-endpoint            = "your-s3-endpoint.com"
   etcd-s3-access-key          = "YOUR-ACCESS-KEY"
   etcd-s3-secret-key          = "YOUR-SECRET-KEY"
+
+  # not in config, write config to local file path
+  local_file_path = "${abspath(path.root)}/rke2"
+  local_file_name = "rke2-config.yaml"
 }

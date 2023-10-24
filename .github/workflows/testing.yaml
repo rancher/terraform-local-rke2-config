@@ -60,4 +60,4 @@ jobs:
         with_wrapper: false
 
     - name: Run Terratest
-      run: cd ./tests && go test -v -timeout 30m -parallel 10
+      run: cd ./tests && go test -v

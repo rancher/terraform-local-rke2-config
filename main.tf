@@ -131,10 +131,4 @@ resource "null_resource" "write_config" {
       chmod 0600 '${local.file_path}/${each.key}'
     EOT
   }
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      rm -f '${local.file_path}/${each.key}'
-    EOT
-  }
 }

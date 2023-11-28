@@ -1,11 +1,7 @@
 # Terraform Local RKE2 Config
 
-WARNING! This is a work in progress and not ready to be used.
-
 This module uses the yamlencode and jsonencode Terraform functions to provide config contents from the variables supplied.
-
 There are two different outputs on this module, yaml and json. Either may be used to configure rke2.
-
 This is an "Independent" module, please see [terraform.md](./terraform.md) for more information.
 
 ## Examples

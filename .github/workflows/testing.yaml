@@ -1,9 +1,9 @@
-name: 'Testing'
+name: Tests
 
 on:
   pull_request:
     branches:
-    - main 
+      - main
 
 jobs:
   terraform:
@@ -11,44 +11,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ">=1.4 <1.6"
-        terraform_wrapper: false
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: nicknovitski/nix-develop@v1
+    - run: cd examples/basic && terraform version && terraform init -upgrade && terraform validate
 
-    - name: Init Basic
-      run: cd examples/basic && terraform init -upgrade
-
-    - name: Validate Basic
-      run: cd examples/basic && terraform validate
+  actionlint:
+    name: 'Lint Workflows'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: DeterminateSystems/magic-nix-cache-action@main
+    - uses: nicknovitski/nix-develop@v1
+    - run: actionlint
 
   tflint:
     name: 'TFLint'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: terraform-linters/setup-tflint@v3
+    - uses: terraform-linters/setup-tflint@v4
       with:
         tflint_version: latest
+    - run: tflint --version
+    - run: tflint --init
+    - run: tflint -f compact
 
-    - name: Show version
-      run: tflint --version
-
-    - name: Init TFLint
-      run: tflint --init
-
-    - name: Run TFLint
-      run: tflint -f compact
-
-  terratest:
-    name: 'Terratest'
+  shellcheck:
+    name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ">=1.4 <1.6"
-        terraform_wrapper: false
+      - uses: ludeeus/action-shellcheck@master
 
-    - name: Run Terratest
-      run: cd ./tests && go test -v
+  validate-commit-message:
+    name: Validate Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

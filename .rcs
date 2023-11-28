@@ -1,1 +1,3 @@
-source ~/.config/alias/default/rc
+source ~/.config/aws/default/rc # add personal aws auth vars
+source ~/.config/github/default/rc # add personal github auth vars
+source ~/.config/alias/default/rc # add personal aliases

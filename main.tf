@@ -111,7 +111,7 @@ locals {
   file_path = (var.local_file_path == "" ? abspath(path.root) : var.local_file_path)
   file_name = var.local_file_name
   file = {
-    "${local.file_path}/${local.file_name}" = (strcontains(local.file_name, "yaml") ? local.yaml_config_content : local.json_config_content)
+    "${local.file_name}" = (strcontains(local.file_name, "yaml") ? local.yaml_config_content : local.json_config_content)
   }
 }
 

@@ -41,9 +41,9 @@ This also leads to improvements as developers tend to plan concurrency efficient
 
 The word "Module" is used in three contexts:
 
-1. As a reference to an independent module published in a/the Terraform registry (Independent Module/XMod)
+1. As a reference to an external module published in a/the Terraform registry (External Module/XMod)
    - this reference is like a library call or an import statement (although it does have parameters)
-   - the reference will be pulled in and compiled just before run time
+   - the reference will be pulled in and compiled at init time, like a provider
    - versions of this module must be pinned to prevent inconsistent builds
 2. As a reference to a local module (Local Module/LMod)
    - this reference is like a function call
@@ -51,7 +51,7 @@ The word "Module" is used in three contexts:
    - an example of this would be a security group and its rules
      - while rules can be added separately from the group and are their own resources they do not make a lot of sense to have in their own external module
      - it may be useful to separate out the rules from the group in logical form to keep top level (implementation) modules clean
-3. As an implementation of resources (Implementation Module/IMod)
+3. As an implementation of resources (Implementation Module/IMod/root module)
    - modules are generally considered a way to pull code into a terraform file, but eventually a "root" must be created
    - the "root module" or "impementation module" orchestrates a group of modules with the intent of actually provisioning resources (rather than just as a template or library)
    - using the git ops paradigm the implementation module should be considered the source of truth for the infrastructure

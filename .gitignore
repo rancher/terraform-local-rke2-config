@@ -9,6 +9,12 @@ rke2*
 *.gz
 examples/*/installer.sh
 examples/*/sha256sum.txt
-*flake.lock*
-flake.lock
+examples/*/rke2
+examples/*/tmp
+examples/*/kubeconfig.yaml
+examples/*/kubeconfig*.yaml
+examples/*/tf-*
+examples/*/config/50-*
+examples/*/50-*
 *.lock
+*.DS_*

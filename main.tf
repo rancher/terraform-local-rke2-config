@@ -111,7 +111,7 @@ locals {
   file_path = (var.local_file_path == "" ? abspath(path.root) : var.local_file_path)
   file_name = var.local_file_name
   file = {
-    "${local.file_path}/${local.file_name}" = (strcontains(local.file_name, "yaml") ? local.yaml_config_content : local.json_config_content)
+    tostring(local.file_name) = (strcontains(local.file_name, "yaml") ? local.yaml_config_content : local.json_config_content)
   }
 }
 
@@ -125,16 +125,10 @@ resource "null_resource" "write_config" {
       set -e
       set -x
       install -d '${local.file_path}'
-      cat << EOF > '${each.key}'
+      cat << EOF > '${local.file_path}/${each.key}'
       ${each.value}
       EOF
-      chmod 0600 '${each.key}'
-    EOT
-  }
-  provisioner "local-exec" {
-    when    = destroy
-    command = <<-EOT
-      rm -f '${each.key}'
+      chmod 0600 '${local.file_path}/${each.key}'
     EOT
   }
 }

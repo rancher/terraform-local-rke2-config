@@ -1,18 +1,50 @@
-name: 'Release'
+name: Release
 
 on:
   push:
     branches:
     - main
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: write-all
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
+        id: release-please
         with:
           release-type: terraform-module
+          pull-request-title-pattern: "chore${scope}: release${component} ${version}"
+      - uses: peter-evans/create-or-update-comment@v3
+        name: 'Remind to wait'
+        if: steps.release-please.outputs.pr
+        with:
+          issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
+          body: |
+            Please make sure e2e tests pass before merging this PR!
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - uses: actions/checkout@v4
+        if: steps.release-please.outputs.pr
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+      - uses: DeterminateSystems/nix-installer-action@main
+        if: steps.release-please.outputs.pr
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        if: steps.release-please.outputs.pr
+      - uses: nicknovitski/nix-develop@v1
+        if: steps.release-please.outputs.pr
+      - run: cd ./tests && go test -v -timeout=40m -parallel=10
+        name: 'Terratest'
+        if: steps.release-please.outputs.pr
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_OWNER: rancher
+      - uses: peter-evans/create-or-update-comment@v3
+        name: 'Report Success'
+        if: steps.release-please.outputs.pr
+        with:
+          issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
+          body: |
+            End to End Tests Passed!
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

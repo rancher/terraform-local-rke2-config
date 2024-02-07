@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.1...v0.1.2) (2024-02-07)
+
+
+### Bug Fixes
+
+* update workflows and flake ([#23](https://github.com/rancher/terraform-local-rke2-config/issues/23)) ([69d568b](https://github.com/rancher/terraform-local-rke2-config/commit/69d568b2caa39010e0f37bc228567cfe568f99ba))
+
 ## [0.1.1](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.0...v0.1.1) (2023-11-28)
 
 

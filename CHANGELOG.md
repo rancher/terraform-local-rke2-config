@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.2...v0.1.3) (2024-02-09)
+
+
+### Bug Fixes
+
+* update tf req to latest opensource version ([#25](https://github.com/rancher/terraform-local-rke2-config/issues/25)) ([14be688](https://github.com/rancher/terraform-local-rke2-config/commit/14be688e0f2b3c2f0c0ec9b4d9fdebc1a0b448ff))
+
 ## [0.1.2](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.1...v0.1.2) (2024-02-07)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.3...v0.1.4) (2024-08-15)
+
+
+### Bug Fixes
+
+* ipv6 server regex allows port ([#27](https://github.com/rancher/terraform-local-rke2-config/issues/27)) ([0ceeacc](https://github.com/rancher/terraform-local-rke2-config/commit/0ceeacc63d0676e813c22f4eef2fc71d8f8d2a33))
+
 ## [0.1.3](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.2...v0.1.3) (2024-02-09)
 
 

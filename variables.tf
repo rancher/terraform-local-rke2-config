@@ -356,9 +356,9 @@ variable "server" {
   validation {
     condition = (
       var.server != null ? anytrue([
-        can(regex("^https?://(?:[[:alnum:]\\p{Pd}]{1,63}\\.)*[[:alnum:]\\p{Pd}]{1,63}(?::[[:digit:]]{1,5})?$", var.server)), # FQDN with optional port
-        can(regex("^https?://(?:[[:digit:]]{1,3}\\.){3}[[:digit:]]{1,3}(?::[[:digit:]]{1,5})?$", var.server)),               # IPv4 with optional port
-        can(regex("^https?://(?:[[:xdigit:]]{0,4}:{1,7}){1,7}[[:xdigit:]]{0,4}$", var.server)),                              # IPv6
+        can(regex("^https?://(?:[[:alnum:]\\p{Pd}]{1,63}\\.)*[[:alnum:]\\p{Pd}]{1,63}(?::[[:digit:]]{1,5})?$", var.server)),                 # FQDN with optional port
+        can(regex("^https?://(?:[[:digit:]]{1,3}\\.){3}[[:digit:]]{1,3}(?::[[:digit:]]{1,5})?$", var.server)),                               # IPv4 with optional port
+        can(regex("^https?://[\\[]{0,1}(?:[[:xdigit:]]{0,4}:{1,7}){1,7}[[:xdigit:]]{0,4}[\\]]{0,1}[:]{0,1}[[:xdigit:]]{0,4}$", var.server)), # IPv6 with optional port
     ]) : true)
     error_message = "If specified, value must be an address starting with 'http(s)'."
   }

@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
-    - uses: nicknovitski/nix-develop@v1.1.0
+    - uses: nicknovitski/nix-develop@v1.2.0
       with:
         arguments: |
           --ignore-environment \
@@ -44,7 +44,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
-    - uses: nicknovitski/nix-develop@v1.1.0
+    - uses: nicknovitski/nix-develop@v1.2.0
       with:
         arguments: |
           --ignore-environment \
@@ -100,7 +100,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
-    - uses: nicknovitski/nix-develop@v1.1.0
+    - uses: nicknovitski/nix-develop@v1.2.0
       with:
         arguments: |
           --ignore-environment \

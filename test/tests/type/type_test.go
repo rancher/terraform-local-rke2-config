@@ -1,4 +1,4 @@
-package test
+package type_test
 
 import (
 	"testing"
@@ -6,11 +6,11 @@ import (
 	"github.com/gruntwork-io/terratest/modules/terraform"
 )
 
-func TestAdvanced(t *testing.T) {
+func TestTypetest(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/advanced",
+		TerraformDir: "../../../examples/typetest",
 	})
 
 	defer terraform.Destroy(t, terraformOptions)

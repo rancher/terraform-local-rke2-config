@@ -1,4 +1,4 @@
-package test
+package easy
 
 import (
 	"testing"
@@ -10,7 +10,7 @@ func TestEasy(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/easy",
+		TerraformDir: "../../../examples/easy",
 	})
 
 	defer terraform.Destroy(t, terraformOptions)

@@ -96,6 +96,7 @@
             actionlint
             bashInteractive
             curl
+            gh
             git
             gitleaks
             go # need go for terratest

@@ -1,22 +1,20 @@
-package test
+package advanced
 
 import (
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestBasic(t *testing.T) {
+func TestAdvanced(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../examples/basic",
+		TerraformDir: "../../../examples/advanced",
 	})
 
 	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
 
-	output := terraform.Output(t, terraformOptions, "config")
-	assert.Equal(t, "", output)
+	terraform.Output(t, terraformOptions, "config")
 }

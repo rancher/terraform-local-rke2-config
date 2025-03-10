@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.0](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.4...v1.0.0) (2025-03-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove unnecessary tests ([#34](https://github.com/rancher/terraform-local-rke2-config/issues/34))
+
+### Bug Fixes
+
+* remove unnecessary tests ([#34](https://github.com/rancher/terraform-local-rke2-config/issues/34)) ([10338a3](https://github.com/rancher/terraform-local-rke2-config/commit/10338a31d4da3df98e96adf9f687265d1056c622))
+* remove version constraints ([#31](https://github.com/rancher/terraform-local-rke2-config/issues/31)) ([8b8101e](https://github.com/rancher/terraform-local-rke2-config/commit/8b8101ec5e19cae5a27adcd24ddc40adf2b8a722))
+* update to comply with new restrictions ([#32](https://github.com/rancher/terraform-local-rke2-config/issues/32)) ([174a462](https://github.com/rancher/terraform-local-rke2-config/commit/174a462fcd4c580f9eadaaffb41edfeb98d77fe6))
+
 ## [0.1.4](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.3...v0.1.4) (2024-08-15)
 
 

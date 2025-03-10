@@ -103,35 +103,6 @@ if [ "$rerun_failed" = true ] && [ -f "/tmp/${IDENTIFIER}_failed_tests.txt" ]; t
   run_tests true
 fi
 
-echo "Clearing leftovers with Id $IDENTIFIER in $AWS_REGION..."
-sleep 60
-
-if [ -n "$IDENTIFIER" ]; then
-  attempts=0
-  # shellcheck disable=SC2143
-  while [ -n "$(leftovers -d --iaas=aws --aws-region="$AWS_REGION" --filter="Id:$IDENTIFIER" | grep -v 'AccessDenied')" ] && [ $attempts -lt 3 ]; do
-    leftovers --iaas=aws --aws-region="$AWS_REGION" --filter="Id:$IDENTIFIER" --no-confirm | grep -v 'AccessDenied' || true
-    sleep 10
-    attempts=$((attempts + 1))
-  done
-
-  if [ $attempts -eq 3 ]; then
-    echo "Warning: Failed to clear all resources after 3 attempts."
-  fi
-
-  attempts=0
-  # shellcheck disable=SC2143
-  while [ -n "$(leftovers -d --iaas=aws --aws-region="$AWS_REGION" --type="ec2-key-pair" --filter="tf-$IDENTIFIER" | grep -v 'AccessDenied')" ] && [ $attempts -lt 3 ]; do
-    leftovers --iaas=aws --aws-region="$AWS_REGION" --type="ec2-key-pair" --filter="tf-$IDENTIFIER" --no-confirm | grep -v 'AccessDenied' || true
-    sleep 10
-    attempts=$((attempts + 1))
-  done
-
-  if [ $attempts -eq 3 ]; then
-    echo "Warning: Failed to clear all EC2 key pairs after 3 attempts."
-  fi
-fi
-
 if [ -f "/tmp/${IDENTIFIER}_failed_tests.txt" ]; then
   echo "done, test failed"
   exit 1

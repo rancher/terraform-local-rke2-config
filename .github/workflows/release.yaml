@@ -29,7 +29,7 @@ jobs:
               repo: "${{ github.event.repository.name }}",
               body: "Please make sure e2e tests pass before merging this PR! \n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             })
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         if: steps.release-please.outputs.pr
         with:
           token: ${{secrets.GITHUB_TOKEN}}

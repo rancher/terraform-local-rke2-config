@@ -1,6 +1,6 @@
 resource "random_uuid" "token" {}
 
-module "typetest" {
+module "TestTypetest" {
   source = "../../"
 
   # This example exercises the validation for every variable in the module.
@@ -154,8 +154,4 @@ module "typetest" {
   # Module-specific variables (not part of RKE2 config)
   local_file_path = abspath(path.root)
   local_file_name = "rke2-config.yaml"
-}
-
-output "config" {
-  value = module.typetest.config_yaml
 }

@@ -18,11 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # https://github.com/googleapis/release-please-action/releases
-      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release-please
         with:
           release-type: terraform-module
-      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+      # https://github.com/actions/github-script/releases
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         if: steps.release-please.outputs.pr
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -58,7 +59,8 @@ jobs:
           IDENTIFIER: ${{github.run_id}}
         run: |
           ./run_tests.sh
-      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+      # https://github.com/actions/github-script/releases
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         if: steps.release-please.outputs.pr
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}

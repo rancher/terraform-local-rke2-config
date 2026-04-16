@@ -1,47 +1,52 @@
 #!/bin/bash
 
-help_output=$(rke2 help server | grep -- '--')
+# This script parses the output of `rke2 server --help` (provided via stdin)
+# and generates a single JSON object of the form { "option": "description" }.
+# It is designed to be more robust than the previous version by using a
+# single, powerful awk command for parsing.
+#
+# Usage:
+#   docker run --rm rke2-helper | ./helptojson.sh
 
-json_string=""
+set -euo pipefail
 
-while IFS= read -r line
-do
-    name_type=$(echo "$line" | awk -F'(' '{ gsub(/^[ \t]+|[ \t]+$/, "",$1); gsub(/,/, "",$1); gsub(/--/,"",$1); print $1 }')
-    description=$(echo "$line" | awk -F'(' '{ gsub(/^[ \t]+|[ \t]+$/, "", $2); print "("$2 }')
+# Read the help output from stdin
+help_output=$(cat)
 
-    IFS=' ' read -r name type <<< "$name_type"
-
-    if [ -z "$type" ]; then
-        type="bool"
-    else
-	type="string"
-    fi
-
-    json_string+="{\"name\":\"$name\", \"type\":\"$type\", \"description\":\"$description\"},"
-done <<< "$help_output"
-
-json_string=${json_string%?}  # Remove the trailing comma
-
-# Convert JSON to Terraform variables
-jq -c '.[]' <<< "[$json_string]" | while read -r i; do
-    name=$(jq -r '.name' <<< "$i")
-    type=$(jq -r '.type' <<< "$i")
-    description=$(jq -r '.description' <<< "$i")
-
-    # Remove environment variable indicators, as they are not valid in this context (and strip resulting whitespace).
-    description=$(echo "$description" | sed 's/\[[^]]*\]//g' | sed 's/\s*$//')
-
-    # Terraform descriptions need to be sentences, linter checks for a dot at the end, and a capital letter at the beginning.
-    description=$(if [[ "$description" == *"." ]]; then echo "$description"; else echo "$description."; fi)
-    # shellcheck disable=SC2001
-    description=$(echo "$description" | sed 's/\b\(.\)/\u\1/')
-
-    echo "variable \"$name\" {"
-    echo "  type = \"$type\""
-    echo "  description = <<-EOT"
-    echo "    $description"
-    echo "  EOT"
-    echo "  default = \"\""
-    echo "}"
-    echo ""
-done
+# Use awk to parse the OPTIONS section and extract key-value pairs.
+# Then use paste and sed to format it into a valid JSON object.
+echo "$help_output" | \
+awk '
+    # Start processing after the OPTIONS: line
+    /^OPTIONS:/ { in_options = 1; next }
+ 
+    # Only process lines within the OPTIONS section that define a flag
+    !in_options || !/^[[:space:]]+--/ { next }
+ 
+    {
+        # Find the first parenthesis to split flag from description.
+        # The description always seems to start with a category like (db).
+        paren_pos = match($0, /[[:space:]]+\(/)
+        if (paren_pos == 0) {
+            next
+        }
+ 
+        # --- Extract and clean the option name ---
+        flag_part = substr($0, 1, paren_pos - 1)
+        gsub(/^[[:space:]]+--/, "", flag_part)
+        # Take only the first part before a comma or space (to handle aliases and "value")
+        gsub(/,.*/, "", flag_part)
+        gsub(/[[:space:]].*/, "", flag_part)
+        option_name = flag_part
+ 
+        # --- Extract and clean the description ---
+        desc_part = substr($0, paren_pos)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", desc_part)
+        gsub(/[[:space:]]+\[\$.*\]$/, "", desc_part)
+        gsub(/\\/, "\\\\", desc_part)
+        gsub(/"/, "\\\"", desc_part)
+ 
+        # Print the JSON key-value pair
+        print "\"" option_name "\": \"" desc_part "\""
+    }
+' | paste -sd, - | sed 's/^/{/; s/$/}/'

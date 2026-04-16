@@ -1,129 +1,161 @@
-# WARNING!! Don't use this example, this is just a data sample.
-# This example exercises some of the text validation on the input variables to give some examples of what is expected.
-# The values in this example are valid on their own, but may be non-sensical when combined.
-# This example is not intended to be used as-is, but rather as a reference for the types of values that can be used.
-
 resource "random_uuid" "token" {}
 
-module "TestTypetest" {
+module "typetest" {
   source = "../../"
 
-  debug             = true
-  bind-address      = "0.0.0.0"
-  advertise-address = "10.1.1.100"
-  tls-san = [
-    "kubernetes",
-    "kubernetes.default",
-    "kubernetes.default.svc",
-    "kubernetes.default.svc.cluster.local",
-    "127.0.0.1",
-    "::1",
-    "localhost",
-    "ip-10.1.1.100",
-  ]
-  data-dir                    = "/var/lib/rancher/rke2"
-  cluster-cidr                = ["10.42.0.0/16"]
-  service-cidr                = ["10.43.0.0/16"]
+  # This example exercises the validation for every variable in the module.
+  # The values are valid on their own, but may be non-sensical when combined.
+  # This is not intended to be used as-is, but as a reference for expected value types.
+
+  # General & Logging
+  debug                   = "true"
+  server                  = "https://192.168.1.10:6443"
+  data-dir                = "/var/lib/rancher/rke2-typetest"
+  token                   = random_uuid.token.result
+  agent-token             = "uvwxyz.9876543210zyxwvu"
+  write-kubeconfig-mode   = "0640"
+  write-kubeconfig-group  = "staff"
+  profile                 = "cis-1.23"
+  selinux                 = "true"
+  protect-kernel-defaults = "true"
+  enable-pprof            = "true"
+
+  # Networking
+  bind-address                = "0.0.0.0"
+  advertise-address           = "192.168.1.10"
+  tls-san                     = ["my-cluster.example.com", "192.168.1.11"]
+  tls-san-security            = "true"
+  cni                         = ["multus", "cilium"]
+  cluster-cidr                = ["10.42.0.0/16", "2001:cafe:42:0::/56"]
+  service-cidr                = ["10.43.0.0/16", "2001:cafe:42:1::/112"]
   service-node-port-range     = "30000-32767"
   cluster-dns                 = ["10.43.0.10"]
   cluster-domain              = "cluster.local"
-  egress-selector-mode        = "agent"
-  servicelb-namespace         = "kube-system"
-  write-kubeconfig            = "/etc/rancher/rke2/rke2.yaml"
-  write-kubeconfig-mode       = "0600"
-  token                       = random_uuid.token.result
-  token-file                  = "/var/lib/rancher/rke2/server/node-token"
-  agent-token                 = random_uuid.token.result
-  agent-token-file            = "/var/lib/rancher/rke2/agent/agent-token"
-  server                      = "https://127.0.0.1:6443"
-  cluster-reset               = false
-  cluster-reset-restore-path  = "/var/lib/rancher/rke2/server/db/snapshots"
-  kube-apiserver-arg          = ["tls-cipher-suites=TLS_CHACHA20_POLY1305_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256"]
-  etcd-arg                    = []
-  kube-controller-manager-arg = []
-  kube-scheduler-arg          = []
-  etcd-expose-metrics         = false
-  etcd-disable-snapshots      = false
-  etcd-snapshot-name          = "etcd-snapshot"
-  etcd-snapshot-schedule-cron = "0 */12 * * *"
-  etcd-snapshot-retention     = 5
-  etcd-snapshot-dir           = "/var/lib/rancher/rke2/server/db/snapshots"
-  etcd-snapshot-compress      = false
-  etcd-s3                     = true
-  etcd-s3-endpoint            = "s3.amazonaws.com"
-  etcd-s3-endpoint-ca         = "/etc/rancher/rke2/etcd-s3-endpoint-ca.crt"
-  etcd-s3-skip-ssl-verify     = false
-  etcd-s3-access-key          = "MY-AWS-ACCESS-KEY"
-  etcd-s3-secret-key          = "MY-AWS-SECRET-KEY"
-  etcd-s3-bucket              = "my-aws-bucket"
-  etcd-s3-region              = "us-east-1"
-  etcd-s3-folder              = "my-aws-folder"
-  etcd-s3-insecure            = false
-  etcd-s3-timeout             = "5m"
-  disable                     = ["rke2-ingress-nginx"]
-  disable-scheduler           = false
-  disable-cloud-controller    = false
-  disable-kube-proxy          = false
-  node-name                   = "my-node-name"
-  with-node-id                = false
-  node-label = [
-    "node.kubernetes.io/instance-type=t3.xl",
-  ]
-  node-taint = [
-    "node.kubernetes.io/unschedulable=NoSchedule",
-  ]
-  image-credential-provider-bin-dir = "/usr/local/bin"
-  image-credential-provider-config  = "/etc/rancher/rke2/credprovider-config.yaml"
-  container-runtime-endpoint        = "unix:///run/rke2/containerd/containerd.sock"
-  snapshotter                       = "native"
-  private-registry                  = "/etc/rancher/rke2/priivateregistry-config.yaml"
-  system-default-registry           = "docker.io"
-  node-ip                           = ["::1"]
-  node-external-ip                  = ["100.1.100.1"]
-  resolv-conf                       = "/etc/resolv.conf"
-  kubelet-arg = [
-    "alsologtostderr=true",
-    "feature-gates=MemoryManager=true",
-    "kube-reserved=cpu=400m,memory=1Gi",
-    "system-reserved=cpu=400m,memory=1Gi",
-    "memory-manager-policy=Static",
-    "reserved-memory=0:memory=2Gi",
-    "port=10250",
-  ]
-  kube-proxy-arg                       = []
-  protect-kernel-defaults              = false
-  enable-pprof                         = false
-  selinux                              = false
-  lb-server-port                       = "8090"
-  cni                                  = ["multus", "canal"]
-  enable-servicelb                     = false
-  kube-apiserver-image                 = "rancher/kube-apiserver"
-  kube-controller-manager-image        = "rancher/kube-controller-manager:latest"
-  cloud-controller-manager-image       = "private.registry.example/cloud-controller-manager:latest"
-  kube-proxy-image                     = "private.registry.example:5000/kube-proxy:v1.18.6-rancher1"
-  kube-scheduler-image                 = "https://private.registry.example:5000/kube-scheduler:v1.18.6-rancher1"
-  pause-image                          = "pause"
-  runtime-image                        = "runsc"
-  etcd-image                           = "etcd"
-  kubelet-path                         = "/var/lib/rancher/rke2/agent/bin/kubelet"
-  cloud-provider-name                  = "aws"
-  cloud-provider-config                = "/etc/rancher/rke2/cloud-config.yaml"
-  profile                              = "cis-1.24"
-  audit-policy-file                    = "/etc/rancher/rke2/audit-policy.yaml"
-  pod-security-admission-config-file   = "/etc/rancher/rke2/pod-security-admission-config.yaml"
-  control-plane-resource-requests      = ["cpu=100m,memory=250Mi"]
-  control-plane-resource-limits        = ["cpu=200m,memory=500Mi"]
-  control-plane-probe-configuration    = ["kube-proxy-startup-initial-delay-seconds=123"]
-  kube-apiserver-extra-mount           = []
-  kube-scheduler-extra-mount           = []
-  kube-controller-manager-extra-mount  = []
-  kube-proxy-extra-mount               = []
-  etcd-extra-mount                     = []
-  cloud-controller-manager-extra-mount = []
-  kube-apiserver-extra-env             = []
-  kube-scheduler-extra-env             = []
-  kube-controller-manager-extra-env    = []
-  kube-proxy-extra-env                 = []
-  etcd-extra-env                       = []
-  cloud-controller-manager-extra-env   = []
+  node-ip                     = ["192.168.1.10"]
+  node-external-ip            = ["203.0.113.5"]
+  resolv-conf                 = "/etc/resolv.conf"
+  egress-selector-mode        = "cluster"
+  ingress-controller          = "traefik"
+  node-external-dns           = ["8.8.8.8", "1.1.1.1"]
+  node-internal-dns           = ["10.10.10.10"]
+  lb-server-port              = "9345"
+  servicelb-namespace         = "rke2-servicelb"
+  write-kubeconfig            = "/tmp/rke2.yaml"
+  token-file                  = "/var/lib/rancher/rke2/server/token"
+  agent-token-file            = "/var/lib/rancher/rke2/server/agent-token"
+  secrets-encryption-provider = "secretbox"
+
+  # Component Args
+  kubelet-arg                       = ["--v=2", "--serialize-image-pulls=false"]
+  kube-proxy-arg                    = ["--v=2", "--proxy-mode=ipvs"]
+  kube-apiserver-arg                = ["--v=2", "--allow-privileged=true"]
+  kube-controller-manager-arg       = ["--v=2"]
+  kube-scheduler-arg                = ["--v=2"]
+  kube-cloud-controller-manager-arg = ["--v=2"]
+  etcd-arg                          = ["--log-level=debug"]
+
+  # Etcd & Datastore
+  datastore-endpoint               = "etcd://10.0.1.5:2379,etcd://10.0.1.6:2379"
+  datastore-cafile                 = "/path/to/db-ca.pem"
+  datastore-certfile               = "/path/to/db-cert.pem"
+  datastore-keyfile                = "/path/to/db-key.pem"
+  etcd-disable-snapshots           = "false"
+  etcd-expose-metrics              = "true"
+  etcd-snapshot-name               = "rke2-etcd-snapshot"
+  etcd-snapshot-retention          = "10"
+  etcd-snapshot-schedule-cron      = "0 */5 * * *"
+  etcd-snapshot-dir                = "/var/lib/rancher/rke2/server/db/snapshots"
+  etcd-snapshot-compress           = "true"
+  etcd-snapshot-reconcile-interval = "15m"
+  etcd-s3                          = "true"
+  etcd-s3-bucket                   = "rke2-etcd-snapshots"
+  etcd-s3-endpoint                 = "s3.us-west-2.amazonaws.com"
+  etcd-s3-endpoint-ca              = "/path/to/s3-ca.pem"
+  etcd-s3-folder                   = "rke2-backups"
+  etcd-s3-insecure                 = "false"
+  etcd-s3-region                   = "us-west-2"
+  etcd-s3-skip-ssl-verify          = "false"
+  etcd-s3-timeout                  = "10m"
+  etcd-s3-access-key               = "EXAMPLE_ACCESS_KEY"
+  etcd-s3-secret-key               = "EXAMPLE_SECRET_KEY"
+  etcd-s3-session-token            = "EXAMPLE_SESSION_TOKEN"
+  etcd-s3-bucket-lookup-type       = "path"
+  etcd-s3-config-secret            = "my-s3-secret"
+  etcd-s3-proxy                    = "http://proxy.example.com:8080"
+  etcd-s3-retention                = "20"
+
+  # Cluster Reset
+  cluster-reset              = "true"
+  cluster-reset-restore-path = "/var/lib/rancher/rke2/server/db/snapshots/snapshot-to-restore"
+
+  # Disabled Components
+  disable                  = ["rke2-coredns"]
+  disable-scheduler        = "false"
+  disable-cloud-controller = "false"
+  disable-kube-proxy       = "false"
+
+  # Node Configuration
+  node-name                              = "my-rke2-node-1"
+  with-node-id                           = "true"
+  node-label                             = ["app=testing", "tier=frontend"]
+  node-taint                             = ["CriticalAddonsOnly=true:NoExecute"]
+  node-name-from-cloud-provider-metadata = "false"
+
+  # Runtime & Images
+  container-runtime-endpoint        = "unix:///var/run/containerd/containerd.sock"
+  snapshotter                       = "overlayfs"
+  private-registry                  = "/etc/rancher/rke2/registries.yaml"
+  system-default-registry           = "my-registry.corp.net"
+  default-runtime                   = "runc"
+  disable-default-registry-endpoint = "false"
+  nonroot-devices                   = "false"
+  image-credential-provider-bin-dir = "/var/lib/rancher/credentialprovider/bin"
+  image-credential-provider-config  = "/var/lib/rancher/credentialprovider/config.yaml"
+  kube-apiserver-image              = "my-registry.com/rancher/kube-apiserver:v1.2.3"
+  kube-controller-manager-image     = "my-registry.com/rancher/kube-controller-manager:v1.2.3"
+  cloud-controller-manager-image    = "my-registry.com/rancher/cloud-controller-manager:v1.2.3"
+  kube-proxy-image                  = "my-registry.com/rancher/kube-proxy:v1.2.3"
+  kube-scheduler-image              = "my-registry.com/rancher/kube-scheduler:v1.2.3"
+  pause-image                       = "my-registry.com/rancher/pause:3.1"
+  runtime-image                     = "my-registry.com/rancher/runtime:v1.2.3"
+  etcd-image                        = "my-registry.com/rancher/etcd:v3.4.5"
+  helm-job-image                    = "my-registry.com/rancher/helm-job:v1.2.3"
+
+  # Experimental
+  kubelet-path       = "/usr/local/bin/alt-kubelet"
+  supervisor-metrics = "true"
+  embedded-registry  = "true"
+
+  # Cloud Provider
+  cloud-provider-name   = "aws"
+  cloud-provider-config = "/etc/rancher/rke2/cloud.conf"
+
+  # Security
+  audit-policy-file                  = "/etc/rancher/rke2/audit.yaml"
+  pod-security-admission-config-file = "/etc/rancher/rke2/psa.yaml"
+
+  # Static Pod Configuration
+  control-plane-resource-requests      = ["cpu=100m", "memory=256Mi"]
+  control-plane-resource-limits        = ["cpu=200m", "memory=512Mi"]
+  control-plane-probe-configuration    = ["liveness:initialDelaySeconds=15"]
+  kube-apiserver-extra-mount           = ["/host/path/api:/container/path/api"]
+  kube-scheduler-extra-mount           = ["/host/path/scheduler:/container/path/scheduler"]
+  kube-controller-manager-extra-mount  = ["/host/path/cm:/container/path/cm"]
+  kube-proxy-extra-mount               = ["/host/path/proxy:/container/path/proxy"]
+  etcd-extra-mount                     = ["/host/path/etcd:/container/path/etcd"]
+  cloud-controller-manager-extra-mount = ["/host/path/ccm:/container/path/ccm"]
+  kube-apiserver-extra-env             = ["KEY_API=VALUE_API"]
+  kube-scheduler-extra-env             = ["KEY_SCHED=VALUE_SCHED"]
+  kube-controller-manager-extra-env    = ["KEY_CM=VALUE_CM"]
+  kube-proxy-extra-env                 = ["KEY_PROXY=VALUE_PROXY"]
+  etcd-extra-env                       = ["KEY_ETCD=VALUE_ETCD"]
+  cloud-controller-manager-extra-env   = ["KEY_CCM=VALUE_CCM"]
+
+  # Module-specific variables (not part of RKE2 config)
+  local_file_path = abspath(path.root)
+  local_file_name = "rke2-config.yaml"
+}
+
+output "config" {
+  value = module.typetest.config_yaml
 }

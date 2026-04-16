@@ -4,13 +4,13 @@
 # When a user overrides a value, we use the validation block to ensure that the value is of the correct type and format.
 
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/root.go#L14
-# Default: https://github.com/golang/go/blob/go1.20.5/src/sync/atomic/type.go#L35
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/root.go#L14
+# Default: https://github.com/golang/go/blob/master/src/sync/atomic/type.go#L35
 variable "debug" {
   type        = string
   description = <<-EOT
-    (Logging) Turn on debug logs.
-    Defaults to false (Go default).
+    (Logging) If true, turn on debug logs.
+    Defaults to the Go default of false.
   EOT
   default     = null
   validation {
@@ -21,12 +21,30 @@ variable "debug" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L178
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/server.go#L104
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L111
+# Type override: https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/server.go#L49
+# Default: https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/server.go#L15
+variable "data-dir" {
+  type        = string
+  description = <<-EOT
+    (Data) The folder to hold state.
+    Defaults to "/var/lib/rancher/rke2".
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.data-dir != null ? can(regex("^/(?:[\\w\\-\\.]+[/]?)+$", var.data-dir)) : true
+    )
+    error_message = "If specified, value must be a full file path."
+  }
+}
+
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L178
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/server.go#L104
 variable "bind-address" {
   type        = string
   description = <<-EOT
-    (Listener) rke2 bind address.
+    (Listener) The IPv4/IPv6 address for the RKE2 server to bind to.
     Defaults to '0.0.0.0'.
   EOT
   default     = null
@@ -41,13 +59,13 @@ variable "bind-address" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L189
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/server/server.go#L241
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L189
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/server/server.go#L241
 variable "advertise-address" {
   type        = string
   description = <<-EOT
-    (Listener) IPv4 address that apiserver uses to advertise to members of the cluster.
-    Defaults to the external node address or the node address if external is not set.
+    (Listener) The IPv4/IPv6 address that the apiserver uses to advertise to members of the cluster.
+    Defaults to the node's external-ip or internal-ip.
   EOT
   default     = null
   validation {
@@ -61,15 +79,15 @@ variable "advertise-address" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L199
-# Defaults(kubernetes): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/deps/deps.go#L429
-# Defaults(localhost): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/server/server.go#L267
-# Defaults(hostname): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/util/net.go#L162
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L199
+# Defaults(kubernetes): https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/deps/deps.go#L429
+# Defaults(localhost): https://github.com/k3s-io/k3s/blob/main/pkg/cli/server/server.go#L267
+# Defaults(hostname): https://github.com/k3s-io/k3s/blob/main/pkg/util/net.go#L162
 variable "tls-san" {
   type        = list(string)
   description = <<-EOT
-    (Listener) Add additional hostnames or IPv4/IPv6 addresses as Subject Alternative Names on the server TLS cert.
-    Defaults to "kubernetes", "kubernetes.default", "kubernetes.default.svc", "kubernetes.default.svc.cluster.local", "127.0.0.1","::1", "localhost", and your server's hostname.
+    (Listener) A list of additional hostnames or IPv4/IPv6 addresses to add as Subject Alternative Names (SANs) on the server's TLS certificate.
+    See Kubernetes documentation for default values.
     https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/
   EOT
   default     = null
@@ -93,30 +111,29 @@ variable "tls-san" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L111
-# Type override: https://github.com/rancher/rke2/blob/v1.27.3+rke2r1/pkg/cli/cmds/server.go#L49
-# Default: https://github.com/rancher/rke2/blob/v1.27.3+rke2r1/pkg/cli/cmds/server.go#L15
-variable "data-dir" {
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L235
+variable "tls-san-security" {
   type        = string
   description = <<-EOT
-    (Data) Folder to hold state.
-    Defaults to "/var/lib/rancher/rke2"
+    (Listener) If true, refuse to add Subject Alternative Names to the server's TLS certificate 
+    that are not associated with the Kubernetes API Server, server nodes, or values from the 'tls-san' option.
+    Defaults to true.
   EOT
   default     = null
   validation {
     condition = (
-      var.data-dir != null ? can(regex("^/(?:[\\w\\-\\.]+[/]?)+$", var.data-dir)) : true
+      var.tls-san-security != null ? can(regex("^(true|false)$", var.tls-san-security)) : true
     )
-    error_message = "If specified, value must be a full file path."
+    error_message = "If specified, value must be 'true' or 'false'."
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L122
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/server.go#L223
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L122
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/server.go#L223
 variable "cluster-cidr" {
   type        = list(string)
   description = <<-EOT
-    (Networking) IPv4/IPv6 network CIDRs to use for pod IPs.
+    (Networking) A list of IPv4/IPv6 network CIDRs to use for pod IPs.
     Defaults to "10.42.0.0/16".
   EOT
   default     = null
@@ -136,12 +153,12 @@ variable "cluster-cidr" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L127
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/server.go#L228
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L127
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/server.go#L228
 variable "service-cidr" {
   type        = list(string)
   description = <<-EOT
-    (Networking) IPv4/IPv6 network CIDRs to use for service IPs.
+    (Networking) A list of IPv4/IPv6 network CIDRs to use for service IPs.
     Defaults to "10.43.0.0/16".
   EOT
   default     = null
@@ -161,12 +178,12 @@ variable "service-cidr" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L132
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L136
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L132
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L136
 variable "service-node-port-range" {
   type        = string
   description = <<-EOT
-    (Networking) Port range to reserve for services with NodePort visibility.
+    (Networking) The port range to reserve for services with NodePort visibility.
     Defaults to "30000-32767".
   EOT
   default     = null
@@ -178,12 +195,13 @@ variable "service-node-port-range" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L138
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/server.go#L233
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L138
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/server.go#L233
 variable "cluster-dns" {
   type        = list(string)
   description = <<-EOT
-    (Networking) IPv4 Cluster IP for coredns service. Should be in your service-cidr range.
+    (Networking) The IPv4 Cluster IP for the coredns service.
+    This should be an address within your 'service-cidr' range.
     Defaults to "10.43.0.10".
   EOT
   default     = null
@@ -206,12 +224,12 @@ variable "cluster-dns" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L143
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L147
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L143
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L147
 variable "cluster-domain" {
   type        = string
   description = <<-EOT
-    (Networking) Cluster Domain.
+    (Networking) The top-level domain for the cluster.
     Defaults to "cluster.local".
   EOT
   default     = null
@@ -224,12 +242,13 @@ variable "cluster-domain" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L232
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L235
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L232
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L235
 variable "egress-selector-mode" {
   type        = string
   description = <<-EOT
-    (Networking) One of 'agent', 'cluster', 'pod', 'disabled'.
+    (Networking) The egress selector mode.
+    Must be one of 'agent', 'cluster', 'pod', or 'disabled'.
     Defaults to 'agent'.
   EOT
   default     = null
@@ -241,12 +260,12 @@ variable "egress-selector-mode" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L238
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L241
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L238
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L241
 variable "servicelb-namespace" {
   type        = string
   description = <<-EOT
-    (Networking) Namespace of the pods for the servicelb component.
+    (Networking) The namespace where the ServiceLB component pods will be deployed.
     Defaults to 'kube-system'.
   EOT
   default     = null
@@ -258,13 +277,13 @@ variable "servicelb-namespace" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L243
-# Default(directory): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/datadir/datadir.go#L16
-# Default(path): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/server/server.go#L435
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L243
+# Default(directory): https://github.com/k3s-io/k3s/blob/main/pkg/datadir/datadir.go#L16
+# Default(path): https://github.com/k3s-io/k3s/blob/main/pkg/server/server.go#L435
 variable "write-kubeconfig" {
   type        = string
   description = <<-EOT
-    (Client) Write kubeconfig for admin client to this file.
+    (Client) The file path where the kubeconfig for the admin client will be written.
     Defaults to '/etc/rancher/rke2/rke2.yaml'.
   EOT
   default     = null
@@ -276,12 +295,12 @@ variable "write-kubeconfig" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L249
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/server/server.go#L468
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L249
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/server/server.go#L468
 variable "write-kubeconfig-mode" {
   type        = string
   description = <<-EOT
-    (Client) Write kubeconfig with this mode.
+    (Client) The file mode (in octal) for the generated kubeconfig file.
     Defaults to '0600'.
   EOT
   default     = null
@@ -293,64 +312,63 @@ variable "write-kubeconfig-mode" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L116
-# Default(call to generate): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/kubeadm/token.go#L45
-# Default(generate): https://github.com/kubernetes/cluster-bootstrap/blob/v0.27.3/token/util/helpers.go#L45
-# Default(random): https://github.com/kubernetes/cluster-bootstrap/blob/v0.27.3/token/util/helpers.go#L61
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L116
+# Default(call to generate): https://github.com/k3s-io/k3s/blob/main/pkg/kubeadm/token.go#L45
+# Default(generate): https://github.com/kubernetes/cluster-bootstrap/blob/master/token/util/helpers.go#L45
 variable "token" {
   type        = string
   description = <<-EOT
     (Cluster) Shared secret used to join a server or agent to a cluster.
-    If no token or token file is set, a random token will be generated.
+    If no token or token file is set, a random token is generated.
+    The token must be in the format '[a-z0-9]{6}.[a-z0-9]{16}'.
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L256
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cluster/storage.go#L125
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L256
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cluster/storage.go#L125
 variable "token-file" {
   type        = string
   description = <<-EOT
-    (Cluster) File containing the token.
+    (Cluster) The path to a file containing the shared secret token.
+    This is ignored if 'token' is set.
+    If neither is set, a random token is generated.
     Defaults to "/var/lib/rancher/rke2/server/token".
-    This is ignored if token is set. 
-    If no token or token-file is set, a random token will be generated.
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L262
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cluster/bootstrap.go#L440
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L262
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cluster/bootstrap.go#L440
 variable "agent-token" {
   type        = string
   description = <<-EOT
-    (Cluster) Shared secret used to join agents to the cluster, but not servers.
-    Defaults to the value of token.
+    (Cluster) A shared secret used exclusively for joining agents to the cluster (not servers).
+    If not set, it defaults to the value of 'token'.
+    The token must be in the format '[a-z0-9]{6}.[a-z0-9]{16}'.
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L268
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/server/server.go#L396
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L268
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/server/server.go#L396
 variable "agent-token-file" {
   type        = string
   description = <<-EOT
-    (Cluster) File containing the agent secret.
-    Defaults to "/var/lib/rancher/rke2/server/agent-token".
-    This is ignored if agent-token is set.
+    (Cluster) The path to a file containing the agent-specific token.
+    This is ignored if 'agent-token' is set. Defaults to "/var/lib/rancher/rke2/server/agent-token".
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L274
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/server/server.go#L115
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/server/server.go#L493
-# Default(loopback): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/config/types.go#L258
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L274
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/cli/server/server.go#L115
+# Default(loopback): https://github.com/k3s-io/k3s/blob/main/pkg/daemons/config/types.go#L258
 variable "server" {
   type        = string
   description = <<-EOT
-    (Cluster) Server to connect to, used to join a cluster.
-    Defaults to bind address and management port, if not otherwise set "https://127.0.0.1:6443".
+    (Cluster) The URL of the server to connect to when joining a cluster.
+    Defaults to "https://127.0.0.1:6443" if not otherwise set.
   EOT
   default     = null
   validation {
@@ -364,13 +382,13 @@ variable "server" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L286
-# Default: https://github.com/golang/go/blob/go1.20.5/src/sync/atomic/type.go#L35
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L286
+# Default: https://github.com/golang/go/blob/master/src/sync/atomic/type.go#L35
 variable "cluster-reset" {
   type        = string
   description = <<-EOT
-    (Cluster) Forget all peers and become sole member of a new cluster.
-    Defaults to false (Go default).
+    (Cluster) If true, forget all peers and become the sole member of a new cluster.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -381,15 +399,14 @@ variable "cluster-reset" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L292
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/etcd/etcd.go#L270
-# Default(snapshot dir): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/etcd/etcd.go#L1184
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L292
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/etcd/etcd.go#L270
+# Default(snapshot dir): https://github.com/k3s-io/k3s/blob/main/pkg/etcd/etcd.go#L1184
 variable "cluster-reset-restore-path" {
   type        = string
   description = <<-EOT
-    (Db) Path to snapshot file to be restored.
-    This doesn't make sense without cluster-reset = true.
-    Default snapshot path is "/var/lib/rancher/rke2/server/db/snapshots".
+    (Db) The path to a snapshot file to restore when 'cluster-reset' is true.
+    The default snapshot path is "/var/lib/rancher/rke2/server/db/snapshots".
   EOT
   default     = null
   validation {
@@ -403,12 +420,13 @@ variable "cluster-reset-restore-path" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L149
-# Default: https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/daemons/control/server.go#L153
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L149
+# Default: https://github.com/k3s-io/k3s/blob/main/pkg/daemons/control/server.go#L153
 variable "kube-apiserver-arg" {
   type        = list(string)
   description = <<-EOT
-    (Flags) Customized flag for kube-apiserver process.
+    (Flags) A list of additional arguments to pass to the kube-apiserver process.
+    e.g., ["--v=4"].
   EOT
   default     = null
   validation {
@@ -421,11 +439,12 @@ variable "kube-apiserver-arg" {
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L154
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L154
 variable "etcd-arg" {
   type        = list(string)
   description = <<-EOT
-    (Flags) Customized flag for etcd process.
+    (Flags) A list of additional arguments to pass to the etcd process.
+    e.g., ["--log-level=debug"].
   EOT
   default     = null
   validation {
@@ -438,11 +457,12 @@ variable "etcd-arg" {
   # https://etcd.io/docs/v3.2/op-guide/configuration/
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L164
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L164
 variable "kube-controller-manager-arg" {
   type        = list(string)
   description = <<-EOT
-    (Flags) Customized flag for kube-controller-manager process.
+    (Flags) A list of additional arguments to pass to the kube-controller-manager process.
+    e.g., ["--v=4"].
   EOT
   default     = null
   validation {
@@ -455,11 +475,12 @@ variable "kube-controller-manager-arg" {
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L159
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L159
 variable "kube-scheduler-arg" {
   type        = list(string)
   description = <<-EOT
-    (Flags) Customized flag for kube-scheduler process.
+    (Flags) A list of additional arguments to pass to the kube-scheduler process.
+    e.g., ["--v=4"].
   EOT
   default     = null
   validation {
@@ -472,11 +493,12 @@ variable "kube-scheduler-arg" {
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-scheduler/
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L330
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L330
 variable "etcd-expose-metrics" {
   type        = string
   description = <<-EOT
-    (Db) Expose etcd metrics to client interface.
+    (Db) If true, expose etcd metrics on the client interface.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -487,11 +509,12 @@ variable "etcd-expose-metrics" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L335
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L335
 variable "etcd-disable-snapshots" {
   type        = string
   description = <<-EOT
-    (Db) Disable automatic etcd snapshots.
+    (Db) If true, disable automatic etcd snapshots.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -502,11 +525,11 @@ variable "etcd-disable-snapshots" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L340
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L340
 variable "etcd-snapshot-name" {
   type        = string
   description = <<-EOT
-    (Db) Set the base name of etcd snapshots.
+    (Db) The base name for etcd snapshots.
     Defaults to 'etcd-snapshot'.
   EOT
   default     = null
@@ -518,11 +541,11 @@ variable "etcd-snapshot-name" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L346
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L346
 variable "etcd-snapshot-schedule-cron" {
   type        = string
   description = <<-EOT
-    (Db) Snapshot interval time in cron spec. eg. every 5 hours '0 */5 * * *'.
+    (Db) A cron expression specifying the interval for etcd snapshots (e.g., '0 */5 * * *' for every 5 hours).
     Defaults to '0 */12 * * *'.
   EOT
   default     = null
@@ -537,11 +560,11 @@ variable "etcd-snapshot-schedule-cron" {
   }
 }
 
-# Type(int): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L352
+# Type(int): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L352
 variable "etcd-snapshot-retention" {
   type        = string
   description = <<-EOT
-    (Db) Number of snapshots to retain.
+    (Db) The number of local etcd snapshots to retain.
     Defaults to 5.
   EOT
   default     = null
@@ -553,11 +576,12 @@ variable "etcd-snapshot-retention" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L358
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L358
 variable "etcd-snapshot-dir" {
   type        = string
   description = <<-EOT
-    (Db) Directory to save db snapshots.
+    (Db) The directory where local etcd snapshots are saved.
+    Defaults to the 'db/snapshots' subdirectory of the data-dir.
   EOT
   default     = null
   validation {
@@ -568,11 +592,12 @@ variable "etcd-snapshot-dir" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L363
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L363
 variable "etcd-snapshot-compress" {
   type        = string
   description = <<-EOT
-    (Db) Compress etcd snapshot.
+    (Db) If true, compress etcd snapshots.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -583,11 +608,12 @@ variable "etcd-snapshot-compress" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L368
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L368
 variable "etcd-s3" {
   type        = string
   description = <<-EOT
-    (Db) Enable backup to S3.
+    (Db) If true, enable backing up etcd snapshots to an S3-compatible object store.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -598,11 +624,11 @@ variable "etcd-s3" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L373
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L373
 variable "etcd-s3-endpoint" {
   type        = string
   description = <<-EOT
-    (Db) S3 endpoint url.
+    (Db) The S3 endpoint URL for etcd snapshot backups.
     Defaults to 's3.amazonaws.com'.
   EOT
   default     = null
@@ -617,13 +643,11 @@ variable "etcd-s3-endpoint" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L379
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L379
 variable "etcd-s3-endpoint-ca" {
   type        = string
   description = <<-EOT
-    (Db) S3 custom CA cert to connect to S3 endpoint.
-    Path to a PEM-encoded CA cert file to use to verify the S3 endpoint.
-    This is only necessary if the S3 endpoint is using a custom CA.
+    (Db) The path to a custom CA certificate file for verifying the S3 endpoint's TLS certificate.
   EOT
   default     = null
   validation {
@@ -634,11 +658,12 @@ variable "etcd-s3-endpoint-ca" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L384
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L384
 variable "etcd-s3-skip-ssl-verify" {
   type        = string
   description = <<-EOT
-    (Db) Disables S3 SSL certificate validation.
+    (Db) If true, disable SSL certificate validation for the S3 endpoint.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -649,29 +674,29 @@ variable "etcd-s3-skip-ssl-verify" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L389
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L389
 variable "etcd-s3-access-key" {
   type        = string
   description = <<-EOT
-    (Db) S3 access key id.
+    (Db) The S3 access key ID for authentication.
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L395
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L395
 variable "etcd-s3-secret-key" {
   type        = string
   description = <<-EOT
-    (Db) S3 secret access key.
+    (Db) The S3 secret access key for authentication.
   EOT
   default     = null
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L401
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L401
 variable "etcd-s3-bucket" {
   type        = string
   description = <<-EOT
-    (Db) S3 bucket name.
+    (Db) The name of the S3 bucket to use for snapshot backups.
   EOT
   default     = null
   validation {
@@ -682,12 +707,12 @@ variable "etcd-s3-bucket" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L406
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L406
 variable "etcd-s3-region" {
   type        = string
   description = <<-EOT
-    (Db) S3 region / bucket location.
-    Defaults to us-east-1.
+    (Db) The S3 region or bucket location.
+    Defaults to 'us-east-1'.
   EOT
   default     = null
   validation {
@@ -698,11 +723,11 @@ variable "etcd-s3-region" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L412
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L412
 variable "etcd-s3-folder" {
   type        = string
   description = <<-EOT
-    (Db) S3 folder.
+    (Db) The folder within the S3 bucket to store snapshots.
   EOT
   default     = null
   validation {
@@ -713,11 +738,12 @@ variable "etcd-s3-folder" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L417
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L417
 variable "etcd-s3-insecure" {
   type        = string
   description = <<-EOT
-    (Db) Disables S3 over HTTPS.
+    (Db) If true, disable using HTTPS for S3 connections.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -728,12 +754,12 @@ variable "etcd-s3-insecure" {
   }
 }
 
-# Type(duration): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L422
+# Type(duration): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L422
 variable "etcd-s3-timeout" {
   type        = string
   description = <<-EOT
-    (Db) S3 timeout.
-    Defaults to 5m.
+    (Db) The timeout for S3 operations, specified as a Go duration string (e.g., '5m').
+    Defaults to '5m0s'.
   EOT
   default     = null
   validation {
@@ -744,11 +770,12 @@ variable "etcd-s3-timeout" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L433
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L433
 variable "disable" {
   type        = list(string)
   description = <<-EOT
-    (Components) Do not deploy packaged components and delete any deployed components.
+    (Components) A list of packaged components to disable (e.g., 'rke2-coredns').
+    Disabling a component prevents it from being deployed.
   EOT
   default     = null
   validation {
@@ -767,11 +794,12 @@ variable "disable" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L437
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L437
 variable "disable-scheduler" {
   type        = string
   description = <<-EOT
-    (Components) Disable Kubernetes default scheduler.
+    (Components) If true, disable the default Kubernetes scheduler.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -782,11 +810,12 @@ variable "disable-scheduler" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L442
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L442
 variable "disable-cloud-controller" {
   type        = string
   description = <<-EOT
-    (Components) Disable rke2 default cloud controller manager.
+    (Components) If true, disable the default RKE2 cloud controller manager.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -797,11 +826,12 @@ variable "disable-cloud-controller" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L447
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L447
 variable "disable-kube-proxy" {
   type        = string
   description = <<-EOT
-    (Components) Disable running kube-proxy.
+    (Components) If true, disable running kube-proxy.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -812,11 +842,11 @@ variable "disable-kube-proxy" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L78
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L78
 variable "node-name" {
   type        = string
   description = <<-EOT
-    (Agent/node) Node name.
+    (Agent/node) The name of the node as it will be registered in Kubernetes.
   EOT
   default     = null
   validation {
@@ -827,11 +857,12 @@ variable "node-name" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L84
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L84
 variable "with-node-id" {
   type        = string
   description = <<-EOT
-    (Agent/node) Append id to node name.
+    (Agent/node) If true, append a unique ID to the node name.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -842,11 +873,12 @@ variable "with-node-id" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L189
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L189
 variable "node-label" {
   type        = list(string)
   description = <<-EOT
-    (Agent/node) Registering and starting kubelet with set of labels.
+    (Agent/node) A list of labels to add to the node during registration.
+    e.g., ["foo=bar", "baz=qux"].
   EOT
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels/#labels
   default = null
@@ -869,11 +901,12 @@ variable "node-label" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L184
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L184
 variable "node-taint" {
   type        = list(string)
   description = <<-EOT
-    (Agent/node) Registering kubelet with set of taints.
+    (Agent/node) A list of taints to apply to the node during registration.
+    e.g., ["key=value:NoSchedule"].
   EOT
   default     = null
   validation {
@@ -886,11 +919,12 @@ variable "node-taint" {
   # https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/#syntax
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L194
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L194
 variable "image-credential-provider-bin-dir" {
   type        = string
   description = <<-EOT
-    (Agent/node) The path to the directory where credential provider plugin binaries are located.
+    (Agent/node) The path to the directory containing credential provider plugin binaries.
+    Defaults to "/var/lib/rancher/credentialprovider/bin".
   EOT
   default     = null
   validation {
@@ -904,11 +938,12 @@ variable "image-credential-provider-bin-dir" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L200
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L200
 variable "image-credential-provider-config" {
   type        = string
   description = <<-EOT
-    (Agent/node) The path to the credential provider plugin config file.
+    (Agent/node) The path to the configuration file for the credential provider plugin.
+    Defaults to "/var/lib/rancher/credentialprovider/config.yaml".
   EOT
   default     = null
   validation {
@@ -922,12 +957,12 @@ variable "image-credential-provider-config" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L112
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L112
 variable "container-runtime-endpoint" {
   type        = string
   description = <<-EOT
-    (Agent/runtime) Disable embedded containerd and use the CRI socket at the given path; 
-    when used with --docker this sets the docker socket path.
+    (Agent/runtime) The path to an external container runtime endpoint (CRI socket).
+    If set, the embedded containerd will be disabled.
   EOT
   default     = null
   validation {
@@ -941,11 +976,12 @@ variable "container-runtime-endpoint" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L135
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L135
 variable "snapshotter" {
   type        = string
   description = <<-EOT
-    (Agent/runtime) Override default containerd snapshotter.
+    (Agent/runtime) The name of the containerd snapshotter to use, overriding the default.
+    Defaults to "overlayfs".
   EOT
   default     = null
   validation {
@@ -956,11 +992,12 @@ variable "snapshotter" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L117
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L117
 variable "private-registry" {
   type        = string
   description = <<-EOT
-    (Agent/runtime) Private registry configuration file.
+    (Agent/runtime) The path to a private registry configuration file (registries.yaml).
+    Defaults to "/etc/rancher/rke2/registries.yaml".
   EOT
   default     = null
   validation {
@@ -971,11 +1008,11 @@ variable "private-registry" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L491
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L491
 variable "system-default-registry" {
   type        = string
   description = <<-EOT
-    (Agent/runtime) Private registry to be used for all system images.
+    (Agent/runtime) A private registry to use for all system images, overriding the default.
   EOT
   default     = null
   validation {
@@ -989,11 +1026,11 @@ variable "system-default-registry" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L68
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L68
 variable "node-ip" {
   type        = list(string)
   description = <<-EOT
-    (Agent/networking) IPv4/IPv6 addresses to advertise for node.
+    (Agent/networking) A list of IPv4/IPv6 addresses to advertise for the node's internal IP.
   EOT
   default     = null
   validation {
@@ -1016,11 +1053,11 @@ variable "node-ip" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L73
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L73
 variable "node-external-ip" {
   type        = list(string)
   description = <<-EOT
-    (Agent/networking) IPv4/IPv6 external IP addresses to advertise for node.
+    (Agent/networking) A list of IPv4/IPv6 addresses to advertise for the node's external IP.
   EOT
   default     = null
   validation {
@@ -1043,11 +1080,11 @@ variable "node-external-ip" {
   }
 }
 
-# Type(string): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L168
+# Type(string): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L168
 variable "resolv-conf" {
   type        = string
   description = <<-EOT
-    (Agent/networking) Kubelet resolv.conf file.
+    (Agent/networking) The path to a custom resolv.conf file for the kubelet to use.
   EOT
   default     = null
   validation {
@@ -1058,11 +1095,12 @@ variable "resolv-conf" {
   }
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L174
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L174
 variable "kubelet-arg" {
   type        = list(string)
   description = <<-EOT
-    (Agent/flags) Customized flag for kubelet process.
+    (Agent/flags) A list of additional arguments to pass to the kubelet process.
+    e.g., ["--v=4"].
   EOT
   default     = null
   validation {
@@ -1075,11 +1113,12 @@ variable "kubelet-arg" {
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/
 }
 
-# Type(slice): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L179
+# Type(slice): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L179
 variable "kube-proxy-arg" {
   type        = list(string)
   description = <<-EOT
-    (Agent/flags) Customized flag for kube-proxy process.
+    (Agent/flags) A list of additional arguments to pass to the kube-proxy process.
+    e.g., ["--v=4"].
   EOT
   default     = null
   validation {
@@ -1092,11 +1131,12 @@ variable "kube-proxy-arg" {
   # https://kubernetes.io/docs/reference/command-line-tools-reference/kube-proxy/
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L89
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L89
 variable "protect-kernel-defaults" {
   type        = string
   description = <<-EOT
-    (Agent/node) Kernel tuning behavior. If set, error if kernel tunables are different than kubelet defaults.
+    (Agent/node) If true, the agent will error out if kernel tunables are different than kubelet's defaults.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -1107,11 +1147,12 @@ variable "protect-kernel-defaults" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/server.go#L515
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/server.go#L515
 variable "enable-pprof" {
   type        = string
   description = <<-EOT
-    (Experimental) Enable pprof endpoint on supervisor port.
+    (Experimental) If true, enable the Go pprof endpoint on the supervisor port for debugging.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -1122,11 +1163,12 @@ variable "enable-pprof" {
   }
 }
 
-# Type(bool): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L94
+# Type(bool): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L94
 variable "selinux" {
   type        = string
   description = <<-EOT
-    (Agent/node) Enable SELinux in containerd.
+    (Agent/node) If true, enable SELinux support in containerd.
+    Defaults to false.
   EOT
   default     = null
   validation {
@@ -1137,14 +1179,13 @@ variable "selinux" {
   }
 }
 
-# Type(int): https://github.com/k3s-io/k3s/blob/v1.27.3%2Bk3s1/pkg/cli/cmds/agent.go#L100
+# Type(int): https://github.com/k3s-io/k3s/blob/main/pkg/cli/cmds/agent.go#L100
 variable "lb-server-port" {
   type        = string
   description = <<-EOT
-    (Agent/node) Local port for supervisor client load-balancer.
-    If the supervisor and apiserver are not colocated an 
-    additional port 1 less than this port will also be used for the 
-    apiserver client load-balancer.
+    (Agent/node) The local port for the supervisor client load-balancer.
+    An additional port (port-1) is used if the apiserver is not co-located.
+    Defaults to 6444.
   EOT
   default     = null
   validation {
@@ -1155,12 +1196,14 @@ variable "lb-server-port" {
   }
 }
 
-# Type(slice): https://github.com/rancher/rke2/blob/v1.27.3%2Brke2r1/pkg/cli/cmds/server.go#L24
+# Type(slice): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/server.go#L24
 variable "cni" {
   type        = list(string)
   description = <<-EOT
-    (Networking) CNI Plugins to deploy, one of 'none, calico, canal, cilium'; 
-    optionally with multus as the first value to enable the multus meta-plugin.
+    (Networking) A list of CNI plugins to deploy.
+    Valid options include 'calico', 'canal', 'cilium', or 'none'.
+    'multus' can be included as the first item to enable the multus meta-plugin.
+    Defaults to "canal".
   EOT
   default     = null
   validation {
@@ -1180,11 +1223,12 @@ variable "cni" {
   }
 }
 
-# Type(bool): https://github.com/rancher/rke2/blob/v1.27.3%2Brke2r1/pkg/cli/cmds/server.go#L30
+# Type(bool): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/server.go#L30
 variable "enable-servicelb" {
   type        = string
   description = <<-EOT
-    (Components) Enable rke2 default cloud controller manager's service controller.
+    (Components) If true, enable the ServiceLB (service controller) in the default RKE2 cloud controller manager.
+    Defaults to true.
   EOT
   default     = null
   validation {
@@ -1195,11 +1239,11 @@ variable "enable-servicelb" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L19
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "kube-apiserver-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for kube-apiserver.
+    (Image) The container image to use for the kube-apiserver component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1215,11 +1259,11 @@ variable "kube-apiserver-image" {
   # image names have an embedded URL for private/non-docker registries
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L25
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "kube-controller-manager-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for kube-controller-manager.
+    (Image) The container image to use for the kube-controller-manager component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1235,11 +1279,11 @@ variable "kube-controller-manager-image" {
   # image names have an embedded URL for private/non-docker registries
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L32
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "cloud-controller-manager-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for cloud-controller-manager.
+    (Image) The container image to use for the cloud-controller-manager component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1255,11 +1299,11 @@ variable "cloud-controller-manager-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L37
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "kube-proxy-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for kube-proxy.
+    (Image) The container image to use for the kube-proxy component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1275,11 +1319,11 @@ variable "kube-proxy-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L43
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "kube-scheduler-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for kube-scheduler.
+    (Image) The container image to use for the kube-scheduler component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1295,11 +1339,11 @@ variable "kube-scheduler-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L49
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "pause-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for pause.
+    (Image) The container image to use for the pause container, overriding the default.
   EOT
   default     = null
   validation {
@@ -1315,11 +1359,11 @@ variable "pause-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L55
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "runtime-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for runtime binaries.
+    (Image) The container image to use for runtime binaries (e.g., containerd, crictl), overriding the default.
   EOT
   default     = null
   validation {
@@ -1335,11 +1379,11 @@ variable "runtime-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L61
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "etcd-image" {
   type        = string
   description = <<-EOT
-    (Image) Override image to use for etcd.
+    (Image) The container image to use for the etcd component, overriding the default.
   EOT
   default     = null
   validation {
@@ -1355,11 +1399,11 @@ variable "etcd-image" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L67
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "kubelet-path" {
   type        = string
   description = <<-EOT
-    (Experimental/agent) Override kubelet binary path.
+    (Experimental/agent) The path to an alternate kubelet binary, overriding the default.
   EOT
   default     = null
   validation {
@@ -1370,11 +1414,11 @@ variable "kubelet-path" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L73
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "cloud-provider-name" {
   type        = string
   description = <<-EOT
-    (Cloud provider) Cloud provider name.
+    (Cloud provider) The name of the external cloud provider to use.
   EOT
   default     = null
   validation {
@@ -1389,11 +1433,11 @@ variable "cloud-provider-name" {
   }
 }
 
-# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go#L80
+# Type(string): https://github.com/rancher/rke2/blob/master/pkg/cli/cmds/root.go
 variable "cloud-provider-config" {
   type        = string
   description = <<-EOT
-    (Cloud provider) Cloud provider configuration file path.
+    (Cloud provider) The path to the configuration file for the external cloud provider.
   EOT
   default     = null
   validation {
@@ -1409,8 +1453,7 @@ variable "cloud-provider-config" {
 variable "profile" {
   type        = string
   description = <<-EOT
-    (Security) Validate system configuration against the selected benchmark.
-    Defaults to 'cis-1.23'.
+    (Security) The security profile to validate the system configuration against (e.g., 'cis-1.23').
   EOT
   default     = null
   validation {
@@ -1429,7 +1472,7 @@ variable "profile" {
 variable "audit-policy-file" {
   type        = string
   description = <<-EOT
-    (Security) Path to the file that defines the audit policy configuration.
+    (Security) The path to a file defining the audit policy configuration.
   EOT
   default     = null
   validation {
@@ -1443,7 +1486,7 @@ variable "audit-policy-file" {
 variable "pod-security-admission-config-file" {
   type        = string
   description = <<-EOT
-    (Security) Path to the file that defines Pod Security Admission configuration.
+    (Security) The path to a file defining the Pod Security Admission configuration.
   EOT
   default     = null
   validation {
@@ -1461,7 +1504,8 @@ variable "pod-security-admission-config-file" {
 variable "control-plane-resource-requests" {
   type        = list(string)
   description = <<-EOT
-    (Components) Control Plane resource requests.
+    (Components) A list of resource requests for control plane components.
+    e.g., ["cpu=100m", "memory=256Mi"].
   EOT
   default     = null
   validation {
@@ -1478,7 +1522,8 @@ variable "control-plane-resource-requests" {
 variable "control-plane-resource-limits" {
   type        = list(string)
   description = <<-EOT
-    (Components) Control Plane resource limits.
+    (Components) A list of resource limits for control plane components.
+    e.g., ["cpu=200m", "memory=512Mi"].
   EOT
   default     = null
   validation {
@@ -1495,7 +1540,8 @@ variable "control-plane-resource-limits" {
 variable "control-plane-probe-configuration" {
   type        = list(string)
   description = <<-EOT
-    (Components) Control Plane Probe configuration.
+    (Components) A list of probe configurations for control plane components.
+    e.g., ["liveness:initialDelaySeconds=15"].
   EOT
   default     = null
   validation {
@@ -1512,7 +1558,8 @@ variable "control-plane-probe-configuration" {
 variable "kube-apiserver-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-apiserver extra volume mounts.
+    (Components) A list of extra volume mounts for the kube-apiserver.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1529,7 +1576,8 @@ variable "kube-apiserver-extra-mount" {
 variable "kube-scheduler-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-scheduler extra volume mounts.
+    (Components) A list of extra volume mounts for the kube-scheduler.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1546,7 +1594,8 @@ variable "kube-scheduler-extra-mount" {
 variable "kube-controller-manager-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-controller-manager extra volume mounts.
+    (Components) A list of extra volume mounts for the kube-controller-manager.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1563,7 +1612,8 @@ variable "kube-controller-manager-extra-mount" {
 variable "kube-proxy-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-proxy extra volume mounts.
+    (Components) A list of extra volume mounts for the kube-proxy.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1580,7 +1630,8 @@ variable "kube-proxy-extra-mount" {
 variable "etcd-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) etcd extra volume mounts.
+    (Components) A list of extra volume mounts for etcd.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1597,7 +1648,8 @@ variable "etcd-extra-mount" {
 variable "cloud-controller-manager-extra-mount" {
   type        = list(string)
   description = <<-EOT
-    (Components) cloud-controller-manager extra volume mounts.
+    (Components) A list of extra volume mounts for the cloud-controller-manager.
+    e.g., ["/path/on/host:/path/in/container"].
   EOT
   default     = null
   validation {
@@ -1614,7 +1666,8 @@ variable "cloud-controller-manager-extra-mount" {
 variable "kube-apiserver-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-apiserver extra environment variables.
+    (Components) A list of extra environment variables for the kube-apiserver.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1631,7 +1684,8 @@ variable "kube-apiserver-extra-env" {
 variable "kube-scheduler-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-scheduler extra environment variables.
+    (Components) A list of extra environment variables for the kube-scheduler.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1648,7 +1702,8 @@ variable "kube-scheduler-extra-env" {
 variable "kube-controller-manager-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-controller-manager extra environment variables.
+    (Components) A list of extra environment variables for the kube-controller-manager.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1665,7 +1720,8 @@ variable "kube-controller-manager-extra-env" {
 variable "kube-proxy-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) kube-proxy extra environment variables.
+    (Components) A list of extra environment variables for the kube-proxy.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1682,7 +1738,8 @@ variable "kube-proxy-extra-env" {
 variable "etcd-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) etcd extra environment variables.
+    (Components) A list of extra environment variables for etcd.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1699,7 +1756,8 @@ variable "etcd-extra-env" {
 variable "cloud-controller-manager-extra-env" {
   type        = list(string)
   description = <<-EOT
-    (Components) cloud-controller-manager extra environment variables.
+    (Components) A list of extra environment variables for the cloud-controller-manager.
+    e.g., ["KEY=VALUE"].
   EOT
   default     = null
   validation {
@@ -1727,4 +1785,392 @@ variable "local_file_name" {
     A local file name to store the config output.
   EOT
   default     = "50-initial-generated-config.yaml"
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-cafile&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-cafile&type=code
+# Type(string): 
+variable "datastore-cafile" {
+  type        = string
+  description = <<-EOT
+    (db) The path to a PEM-encoded CA file for verifying the TLS certificate of an external datastore.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.datastore-cafile != null ? can(regex("^/(?:[\\w\\.\\p{Pd}]+[/]?)+$", var.datastore-cafile)) : true
+    )
+    error_message = "If specified, value must be a full file path."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-certfile&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-certfile&type=code
+# Type(?):
+variable "datastore-certfile" {
+  type        = string
+  description = <<-EOT
+    (db) The path to a PEM-encoded client certificate file for mTLS authentication with an external datastore.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.datastore-certfile != null ? can(regex("^/(?:[\\w\\.\\p{Pd}]+[/]?)+$", var.datastore-certfile)) : true
+    )
+    error_message = "If specified, value must be a full file path."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-endpoint&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-endpoint&type=code
+# Type(?):
+variable "datastore-endpoint" {
+  type        = string
+  description = <<-EOT
+    (db) The connection string (DSN) for an external datastore (e.g., etcd, NATS, MySQL, Postgres).
+  EOT
+  default     = null
+  # DSN strings are too complex for simple regex validation.
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-keyfile&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20datastore-keyfile&type=code
+# Type(?):
+variable "datastore-keyfile" {
+  type        = string
+  description = <<-EOT
+    (db) The path to the PEM-encoded private key file corresponding to the 'datastore-certfile' for mTLS authentication.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.datastore-keyfile != null ? can(regex("^/(?:[\\w\\.\\p{Pd}]+[/]?)+$", var.datastore-keyfile)) : true
+    )
+    error_message = "If specified, value must be a full file path."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20default-runtime&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20default-runtime&type=code
+# Type(?):
+variable "default-runtime" {
+  type        = string
+  description = <<-EOT
+    (agent/runtime) The default container runtime to use in containerd, useful in multi-runtime configurations.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.default-runtime != null ? can(regex("^[a-zA-Z0-9_.-]+$", var.default-runtime)) : true
+    )
+    error_message = "If specified, value must be a valid runtime name."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20disable-default-registry-endpoint&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20disable-default-registry-endpoint&type=code
+# Type(?):
+variable "disable-default-registry-endpoint" {
+  type        = string
+  description = <<-EOT
+    (agent/containerd) If true, disables containerd's fallback to the default registry (e.g., docker.io) when a private mirror is configured.
+    Defaults to false.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.disable-default-registry-endpoint != null ? can(regex("^(true|false)$", var.disable-default-registry-endpoint)) : true
+    )
+    error_message = "If specified, value must be 'true' or 'false'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20embedded-registry&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20embedded-registry&type=code
+# Type(?):
+variable "embedded-registry" {
+  type        = string
+  description = <<-EOT
+    (components) If true, enable the experimental embedded container registry.
+    This requires the embedded containerd runtime. Defaults to false.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.embedded-registry != null ? can(regex("^(true|false)$", var.embedded-registry)) : true
+    )
+    error_message = "If specified, value must be 'true' or 'false'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-bucket-lookup-type&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-bucket-lookup-type&type=code
+# Type(?):
+variable "etcd-s3-bucket-lookup-type" {
+  type        = string
+  description = <<-EOT
+    (db) The S3 bucket lookup style.
+    Must be one of 'auto', 'dns', or 'path'.
+    Defaults to 'auto'.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.etcd-s3-bucket-lookup-type != null ? can(regex("^(auto|dns|path)$", var.etcd-s3-bucket-lookup-type)) : true
+    )
+    error_message = "If specified, value must be one of 'auto', 'dns', or 'path'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-config-secret&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-config-secret&type=code
+# Type(?):
+variable "etcd-s3-config-secret" {
+  type        = string
+  description = <<-EOT
+    (db) The name of a Kubernetes Secret in the 'kube-system' namespace containing S3 credentials.
+    Used if other 'etcd-s3-*' flags are not set.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.etcd-s3-config-secret != null ? can(regex("^[a-z0-9]([-a-z0-9]*[a-z0-9])?$", var.etcd-s3-config-secret)) : true
+    )
+    error_message = "If specified, value must be a valid Kubernetes secret name."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-proxy&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-proxy&type=code
+# Type(?):
+variable "etcd-s3-proxy" {
+  type        = string
+  description = <<-EOT
+    (db) A proxy server URL to use for S3 connections, overriding system-wide proxy environment variables.
+  EOT
+  default     = null
+  # URL validation is complex, deferring to RKE2.
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-retention&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-retention&type=code
+# Type(?):
+variable "etcd-s3-retention" {
+  type        = string
+  description = <<-EOT
+    (db) The number of S3 snapshots to retain.
+    Older snapshots are automatically deleted. Defaults to 5.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.etcd-s3-retention != null ? can(regex("^[0-9]+$", var.etcd-s3-retention)) : true
+    )
+    error_message = "If specified, value must be a number."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-session-token&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-s3-session-token&type=code
+# Type(?):
+variable "etcd-s3-session-token" {
+  type        = string
+  description = <<-EOT
+    (db) The AWS session token for S3 authentication,
+    typically used with temporary credentials from an STS service.
+  EOT
+  default     = null
+  sensitive   = true
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-snapshot-reconcile-interval&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20etcd-snapshot-reconcile-interval&type=code
+# Type(?):
+variable "etcd-snapshot-reconcile-interval" {
+  type        = string
+  description = <<-EOT
+    (db) The interval to reconcile local and S3 snapshots, specified as a Go duration string (e.g., '10m').
+    Defaults to '10m0s'.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.etcd-snapshot-reconcile-interval != null ? can(regex("^[0-9]+[smh]$", var.etcd-snapshot-reconcile-interval)) : true
+    )
+    error_message = "If specified, value must be a Go duration string (e.g., '10m', '1h')."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20helm-job-image&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20helm-job-image&type=code
+# Type(?):
+variable "helm-job-image" {
+  type        = string
+  description = <<-EOT
+    (helm) The container image for running Helm jobs, such as installing packaged components.
+  EOT
+  default     = null
+  # Image name validation is complex, deferring to RKE2.
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20ingress-controller&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20ingress-controller&type=code
+# Type(?):
+variable "ingress-controller" {
+  type        = string
+  description = <<-EOT
+    (networking) The ingress controller to deploy.
+    Must be one of 'none', 'ingress-nginx', or 'traefik'.
+    Defaults to 'ingress-nginx'.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.ingress-controller != null ? can(regex("^(none|ingress-nginx|traefik)$", var.ingress-controller)) : true
+    )
+    error_message = "If specified, value must be one of 'none', 'ingress-nginx', or 'traefik'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20kube-cloud-controller-manager-arg&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20kube-cloud-controller-manager-arg&type=code
+# Type(?):
+variable "kube-cloud-controller-manager-arg" {
+  type        = list(string)
+  description = <<-EOT
+    (flags) A list of additional arguments to pass to the kube-cloud-controller-manager process.
+    e.g., ["--v=4"].
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.kube-cloud-controller-manager-arg != null ? can(concat(var.kube-cloud-controller-manager-arg, [])) : true
+    )
+    error_message = "If specified, value must be a list of strings."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-external-dns&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-external-dns&type=code
+# Type(?):
+variable "node-external-dns" {
+  type        = list(string)
+  description = <<-EOT
+    (agent/networking) A list of external DNS server IP addresses for the node to use.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.node-external-dns != null ? alltrue([for ip in var.node-external-dns : can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", ip))]) : true
+    )
+    error_message = "If specified, value must be a list of valid IPv4 addresses."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-internal-dns&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-internal-dns&type=code
+# Type(?):
+variable "node-internal-dns" {
+  type        = list(string)
+  description = <<-EOT
+    (agent/networking) A list of internal DNS server IP addresses for the node to use.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.node-internal-dns != null ? alltrue([for ip in var.node-internal-dns : can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$", ip))]) : true
+    )
+    error_message = "If specified, value must be a list of valid IPv4 addresses."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-name-from-cloud-provider-metadata&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20node-name-from-cloud-provider-metadata&type=code
+# Type(?):
+variable "node-name-from-cloud-provider-metadata" {
+  type        = string
+  description = <<-EOT
+    (cloud provider) If true, the agent will get its node name from the cloud provider's instance metadata service.
+    Defaults to false.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.node-name-from-cloud-provider-metadata != null ? can(regex("^(true|false)$", var.node-name-from-cloud-provider-metadata)) : true
+    )
+    error_message = "If specified, value must be 'true' or 'false'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20nonroot-devices&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20nonroot-devices&type=code
+# Type(?):
+variable "nonroot-devices" {
+  type        = string
+  description = <<-EOT
+    (agent/containerd) If true, allows non-root pods to access devices by setting
+     'device_ownership_from_security_context=true' in the containerd CRI config.
+    Defaults to false.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.nonroot-devices != null ? can(regex("^(true|false)$", var.nonroot-devices)) : true
+    )
+    error_message = "If specified, value must be 'true' or 'false'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20secrets-encryption-provider&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20secrets-encryption-provider&type=code
+# Type(?):
+variable "secrets-encryption-provider" {
+  type        = string
+  description = <<-EOT
+    (experimental) The encryption provider for Kubernetes secrets at rest.
+    Must be 'aescbc' or 'secretbox'.
+    Defaults to 'aescbc'.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.secrets-encryption-provider != null ? can(regex("^(aescbc|secretbox)$", var.secrets-encryption-provider)) : true
+    )
+    error_message = "If specified, value must be one of 'aescbc' or 'secretbox'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20supervisor-metrics&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20supervisor-metrics&type=code
+# Type(?):
+variable "supervisor-metrics" {
+  type        = string
+  description = <<-EOT
+    (experimental/components) If true, enable an endpoint for serving internal RKE2 metrics on the supervisor port.
+    Defaults to false.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.supervisor-metrics != null ? can(regex("^(true|false)$", var.supervisor-metrics)) : true
+    )
+    error_message = "If specified, value must be 'true' or 'false'."
+  }
+}
+
+# k3s: https://github.com/search?q=repo%3Ak3s-io%2Fk3s%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20write-kubeconfig-group&type=code
+# rke2: https://github.com/search?q=repo%3Arancher%2Frke2%20path%3Apkg%2Fcli%2Fcmds%2Fserver.go%20write-kubeconfig-group&type=code
+# Type(?):
+variable "write-kubeconfig-group" {
+  type        = string
+  description = <<-EOT
+    (client) The group ownership for the generated kubeconfig file.
+  EOT
+  default     = null
+  validation {
+    condition = (
+      var.write-kubeconfig-group != null ? can(regex("^[a-zA-Z0-9_.-]+$", var.write-kubeconfig-group)) : true
+    )
+    error_message = "If specified, value must be a valid group name."
+  }
 }

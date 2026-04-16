@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.1](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.0...v1.0.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* Add FOSSA scanning workflow ([#38](https://github.com/rancher/terraform-local-rke2-config/issues/38)) ([b0121fa](https://github.com/rancher/terraform-local-rke2-config/commit/b0121fa802e1c238e4ad4a7ea82b1049179403ef))
+* add new options and fix supply chain issues ([#41](https://github.com/rancher/terraform-local-rke2-config/issues/41)) ([20b327c](https://github.com/rancher/terraform-local-rke2-config/commit/20b327cd7c15b08269c1e19b2ceb1a633fb0f2e7))
+* bump actions/checkout from 4 to 6 ([#37](https://github.com/rancher/terraform-local-rke2-config/issues/37)) ([82e6dc1](https://github.com/rancher/terraform-local-rke2-config/commit/82e6dc1e82acf7682e13f6f6cc97ee69a0c13adb))
+* Pin GH Actions to commit sha ([#39](https://github.com/rancher/terraform-local-rke2-config/issues/39)) ([9512bf5](https://github.com/rancher/terraform-local-rke2-config/commit/9512bf5edd35f3fdd2e61915877e05a48e50b421))
+* remove extra output ([#42](https://github.com/rancher/terraform-local-rke2-config/issues/42)) ([d53257b](https://github.com/rancher/terraform-local-rke2-config/commit/d53257b0e2c3a8d3758b7cfeb92149da0e638c62))
+
 ## [1.0.0](https://github.com/rancher/terraform-local-rke2-config/compare/v0.1.4...v1.0.0) (2025-03-10)
 
 

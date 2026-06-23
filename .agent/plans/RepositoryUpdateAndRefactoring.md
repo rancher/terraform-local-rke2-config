@@ -91,6 +91,27 @@ When acting as an AI assistant executing these instructions, follow each phase t
     *   Verify `run_tests.sh` executes the cleanup script reliably via `trap 'cleanup.sh $IDENTIFIER' EXIT` (adjusting syntax if necessary).
     *   Update `run_tests.sh` to remove stale `.terraform` directories and `.terraform.lock.hcl` files, and run `terraform init -upgrade` before priming the plugin cache for both the root module and all example modules.
 
+4.  **ESLint Configuration (`eslint.config.mjs`)**:
+    *   Create `eslint.config.mjs` in the root of the repository using the modern "Flat Config" format:
+        ```javascript
+        import js from "@eslint/js";
+        import globals from "globals";
+
+        export default [
+            js.configs.recommended,
+            {
+                languageOptions: {
+                    ecmaVersion: "latest",
+                    sourceType: "module",
+                    globals: {
+                        ...globals.node
+                    }
+                }
+            }
+        ];
+        ```
+    *   Update `.github/workflows/scripts/eslint.sh` to install dependencies using `npm install --no-save eslint @eslint/js globals` to prevent generating `package.json`/`package-lock.json` files during CI.
+
 ---
 
 ## Phase 2: GitHub Actions & Dependabot (`.github/`)

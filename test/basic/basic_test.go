@@ -11,12 +11,12 @@ func TestBasic(t *testing.T) {
 	t.Parallel()
 
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../../../examples/basic",
+		TerraformDir: "../../examples/basic",
 	})
 
-	defer terraform.Destroy(t, terraformOptions)
-	terraform.InitAndApply(t, terraformOptions)
+	defer terraform.DestroyContext(t, t.Context(), terraformOptions)
+	terraform.InitAndApplyContext(t, t.Context(), terraformOptions)
 
-	output := terraform.Output(t, terraformOptions, "config")
+	output := terraform.OutputContext(t, t.Context(), terraformOptions, "config")
 	assert.Equal(t, "", output)
 }

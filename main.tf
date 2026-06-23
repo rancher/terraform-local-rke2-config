@@ -132,27 +132,26 @@ locals {
   yaml_encoded_config = yamlencode(local.filtered_config)
   yaml_config_content = (chomp(local.yaml_encoded_config) != "{}" ? local.yaml_encoded_config : "")
 
-  file_path = (var.local_file_path == "" ? abspath(path.root) : var.local_file_path)
+  file_path = (var.local_file_path == "" ? path.root : var.local_file_path)
   file_name = var.local_file_name
   file = {
     tostring(local.file_name) = (strcontains(local.file_name, "yaml") ? local.yaml_config_content : local.json_config_content)
   }
 }
 
-resource "null_resource" "write_config" {
+resource "file_local_directory" "config_dir" {
+  path        = local.file_path
+  permissions = "0755"
+}
+
+resource "file_local" "write_config" {
+  depends_on = [
+    file_local_directory.config_dir
+  ]
   for_each = local.file
-  triggers = {
-    config_content = each.value,
-  }
-  provisioner "local-exec" {
-    command = <<-EOT
-      set -e
-      set -x
-      install -d '${local.file_path}'
-      cat << EOF > '${local.file_path}/${each.key}'
-      ${each.value}
-      EOF
-      chmod 0600 '${local.file_path}/${each.key}'
-    EOT
-  }
+
+  contents    = each.value
+  directory   = local.file_path
+  name        = each.key
+  permissions = "0600"
 }

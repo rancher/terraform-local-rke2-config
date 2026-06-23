@@ -7,67 +7,66 @@ on:
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  NIX_INSTALL_SHA: de490f61fcbaf9a5cabf2fa621ddb9ef93ad35d9a23a04e7d51b26e092b63691
-  NIX_INSTALL_VERSION: 2.34.4
 
 permissions: {}
 
 jobs:
   release:
-    permissions: write-all
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      # https://github.com/googleapis/release-please-action/releases
-      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
+      - name: 'Release Please'
+        # https://github.com/googleapis/release-please-action/releases
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release-please
         with:
           release-type: terraform-module
-      # https://github.com/actions/github-script/releases
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+
+      - name: 'Checkout'
+        # https://github.com/actions/checkout/releases
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: 'Free Disk Space Before Test'
+        shell: bash
+        run: |
+          bash .github/workflows/scripts/free-disk-space.sh
+
+      - name: 'Comment PR e2e wait'
+        # https://github.com/actions/github-script/releases
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         if: steps.release-please.outputs.pr
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.createComment({
-              issue_number: ${{ fromJson(steps.release-please.outputs.pr).number }},
-              owner: "${{ github.repository_owner }}",
-              repo: "${{ github.event.repository.name }}",
-              body: "Please make sure e2e tests pass before merging this PR! \n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            })
-      # https://github.com/actions/checkout/releases
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        if: steps.release-please.outputs.pr
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-          fetch-depth: 0
-      - name: install-nix
-        if: steps.release-please.outputs.pr
-        run: |
-          curl -L -o install.sh "https://releases.nixos.org/nix/nix-${NIX_INSTALL_VERSION}/install"
-          echo "${NIX_INSTALL_SHA} install.sh" | sha256sum -c -
-          chmod +x install.sh
-          ./install.sh
-          source /home/runner/.nix-profile/etc/profile.d/nix.sh
-          nix --version
-          which nix
+            const scriptPath = `${process.env.GITHUB_WORKSPACE}/.github/workflows/scripts/pr-e2e-wait.js`;
+            const { default: script } = await import(scriptPath);
+            context.payload.pull_request = { number: ${{ fromJson(steps.release-please.outputs.pr).number }} };
+            await script({ github, context });
+
       - name: Run Tests
         if: steps.release-please.outputs.pr
-        shell: '/home/runner/.nix-profile/bin/nix develop --ignore-environment --extra-experimental-features nix-command --extra-experimental-features flakes --keep HOME --keep SSH_AUTH_SOCK --keep IDENTIFIER --keep GITHUB_TOKEN --keep GITHUB_OWNER --keep ZONE --keep AWS_ROLE --keep AWS_REGION --keep AWS_DEFAULT_REGION --keep AWS_ACCESS_KEY_ID --keep AWS_SECRET_ACCESS_KEY --keep AWS_SESSION_TOKEN --keep UPDATECLI_GPGTOKEN --keep UPDATECLI_GITHUB_TOKEN --keep UPDATECLI_GITHUB_ACTOR --keep GPG_SIGNING_KEY --keep NIX_SSL_CERT_FILE --keep NIX_ENV_LOADED --keep TERM --command bash -e {0}'
+        shell: bash
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           GITHUB_OWNER: rancher
           IDENTIFIER: ${{github.run_id}}
+          ZONE: ${{secrets.ZONE}}
         run: |
-          ./run_tests.sh
-      # https://github.com/actions/github-script/releases
-      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+          bash .github/workflows/scripts/run-in-nix-container.sh "bash .github/workflows/scripts/execute-tests.sh"
+
+      - name: 'Comment PR e2e pass'
+        # https://github.com/actions/github-script/releases
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         if: steps.release-please.outputs.pr
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            github.rest.issues.createComment({
-              issue_number: ${{ fromJson(steps.release-please.outputs.pr).number }},
-              owner: "${{ github.repository_owner }}",
-              repo: "${{ github.event.repository.name }}",
-              body: "End to End Tests Passed! \n ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            })
+            const scriptPath = `${process.env.GITHUB_WORKSPACE}/.github/workflows/scripts/pr-e2e-pass.js`;
+            const { default: script } = await import(scriptPath);
+            context.payload.pull_request = { number: ${{ fromJson(steps.release-please.outputs.pr).number }} };
+            await script({ github, context });

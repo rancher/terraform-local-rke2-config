@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.1...v1.0.2) (2026-06-23)
+
+
+### Bug Fixes
+
+* upgrade test framework, refactor workflows, and add agentic framework ([#46](https://github.com/rancher/terraform-local-rke2-config/issues/46)) ([a7d544a](https://github.com/rancher/terraform-local-rke2-config/commit/a7d544a4d67edc853d60b0bab9bf89e5e8ba5367))
+
 ## [1.0.1](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.0...v1.0.1) (2026-04-16)
 
 

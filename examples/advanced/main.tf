@@ -49,6 +49,6 @@ module "TestAdvanced" {
   etcd-s3-secret-key          = "YOUR-SECRET-KEY"
 
   # not in config, write config to local file path
-  local_file_path = "${abspath(path.root)}/rke2"
+  local_file_path = "${path.root}/rke2"
   local_file_name = "rke2-config.yaml"
 }

@@ -152,6 +152,6 @@ module "TestTypetest" {
   cloud-controller-manager-extra-env   = ["KEY_CCM=VALUE_CCM"]
 
   # Module-specific variables (not part of RKE2 config)
-  local_file_path = abspath(path.root)
+  local_file_path = path.root
   local_file_name = "rke2-config.yaml"
 }

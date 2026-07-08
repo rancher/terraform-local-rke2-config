@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.2...v1.0.3) (2026-07-08)
+
+
+### Bug Fixes
+
+* bump fossas/fossa-action from 1.9.0 to 2.0.0 ([#48](https://github.com/rancher/terraform-local-rke2-config/issues/48)) ([af77d51](https://github.com/rancher/terraform-local-rke2-config/commit/af77d5187c065af5e966d98dc635ed09ba5a8567))
+
 ## [1.0.2](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.1...v1.0.2) (2026-06-23)
 
 

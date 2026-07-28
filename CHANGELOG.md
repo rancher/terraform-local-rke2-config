@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.4](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.3...v1.0.4) (2026-07-22)
+
+
+### Bug Fixes
+
+* bump actions/checkout from 7.0.0 to 7.0.1 ([#50](https://github.com/rancher/terraform-local-rke2-config/issues/50)) ([308a892](https://github.com/rancher/terraform-local-rke2-config/commit/308a892491e5a466864e8a52eb6040e005636189))
+
 ## [1.0.3](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.2...v1.0.3) (2026-07-08)
 
 

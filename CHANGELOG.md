@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.4...v1.0.5) (2026-08-28)
+
+
+### Bug Fixes
+
+* bump rancher-eio/read-vault-secrets ([#52](https://github.com/rancher/terraform-local-rke2-config/issues/52)) ([3aadb77](https://github.com/rancher/terraform-local-rke2-config/commit/3aadb77e43b0787c101d9d19d224a6198caf602f))
+
 ## [1.0.4](https://github.com/rancher/terraform-local-rke2-config/compare/v1.0.3...v1.0.4) (2026-07-22)
 
 
